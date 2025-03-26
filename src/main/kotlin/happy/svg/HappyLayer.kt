@@ -9,6 +9,7 @@ import path.utils.paths.Bounds
 import path.utils.paths.Path
 import path.utils.paths.intersect
 import path.utils.paths.bounds
+import path.utils.paths.path
 import path.utils.paths.rect
 import java.awt.Color
 
@@ -137,7 +138,7 @@ interface HappyLayer {
         outline = outline,
     ))
 
-    fun transform(
+    fun layer(
         color: Color = this.color,
         outline: Color? = this.outline,
         rotation: Int = this.rotation,
@@ -151,6 +152,14 @@ interface HappyLayer {
         transform: MatrixTransform? = null,
         clip: Path? = null,
         block: HappyLayer.() -> Unit
+    )
+
+    fun transform(
+        transform: MatrixTransform? = null,
+        block: HappyLayer.() -> Unit
+    ) = layer(
+        transform = transform,
+        block = block
     )
 
     fun rotate(
@@ -183,7 +192,7 @@ interface HappyLayer {
     fun clip(
         path: Path,
         block: HappyLayer.() -> Unit
-    ) = transform(
+    ) = layer(
         clip = path,
         block = block
     )
@@ -191,8 +200,8 @@ interface HappyLayer {
     fun clip(
         bounds: Bounds,
         block: HappyLayer.() -> Unit
-    ) = transform(
-        clip = rect(bounds),
+    ) = clip(
+        path = rect(bounds),
         block = block
     )
 }
@@ -219,7 +228,7 @@ internal class HappyLayerImpl(
         destination.shapes += shape
     }
 
-    override fun transform(
+    override fun layer(
         color: Color,
         outline: Color?,
         rotation: Int,
