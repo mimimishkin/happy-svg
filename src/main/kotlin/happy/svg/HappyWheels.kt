@@ -211,32 +211,6 @@ object HappyWheels  {
         }
     }
 
-    fun format(
-        tag: String,
-        thisContent: String = "",
-        params: Config.() -> Unit = { }
-    ): String {
-        val (contents, params) = Config().apply(params).let { it.childContents to it.namedParams }
-        val inlineContent = contents.isEmpty() && !thisContent.contains('<')
-        val builder = StringBuilder()
-
-        return if (inlineContent) {
-            builder.append("<$tag ")
-            params.forEach { (key, value) -> builder.append("$key=\"$value\" ") }
-            builder.deleteAt(builder.lastIndex)
-            builder.append(thisContent)
-            builder.append("/>")
-            builder.toString()
-        } else {
-            builder.append("<$tag> ")
-            params.forEach { (key, value) -> builder.append("$key=\"$value\" ") }
-            builder.append("\b\n")
-            contents.forEach { builder.append("    $it\n") }
-            builder.append("</$tag>")
-            builder.toString()
-        }
-    }
-
     const val minVisibleAlpha = 2.55
 
     const val minVisibleArea = 2.0
