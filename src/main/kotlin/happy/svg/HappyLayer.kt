@@ -13,10 +13,10 @@ import path.utils.paths.rect
 import java.awt.Color
 
 @DslMarker
-annotation class HappyLayerBuilderDsl
+annotation class HappyLayerDsl
 
-@HappyLayerBuilderDsl
-interface HappyLayerBuilder {
+@HappyLayerDsl
+interface HappyLayer {
     val color: Color
     val outline: Color?
     val isInteractive: Boolean
@@ -150,13 +150,13 @@ interface HappyLayerBuilder {
 
         transform: MatrixTransform? = null,
         clip: Path? = null,
-        block: HappyLayerBuilder.() -> Unit
+        block: HappyLayer.() -> Unit
     )
 
     fun rotate(
         theta: Double,
         center: Vec2 = Vec2(),
-        block: HappyLayerBuilder.() -> Unit
+        block: HappyLayer.() -> Unit
     ) = transform(
         transform = Transforms.rotate(theta, center.x, center.y),
         block = block
@@ -165,7 +165,7 @@ interface HappyLayerBuilder {
     fun translate(
         x: Double,
         y: Double,
-        block: HappyLayerBuilder.() -> Unit
+        block: HappyLayer.() -> Unit
     ) = transform(
         transform = Transforms.translate(x, y),
         block = block
@@ -174,7 +174,7 @@ interface HappyLayerBuilder {
     fun scale(
         x: Double,
         y: Double = x,
-        block: HappyLayerBuilder.() -> Unit
+        block: HappyLayer.() -> Unit
     ) = transform(
         transform = Transforms.scale(x, y),
         block = block
@@ -182,7 +182,7 @@ interface HappyLayerBuilder {
 
     fun clip(
         path: Path,
-        block: HappyLayerBuilder.() -> Unit
+        block: HappyLayer.() -> Unit
     ) = transform(
         clip = path,
         block = block
@@ -190,14 +190,14 @@ interface HappyLayerBuilder {
 
     fun clip(
         bounds: Bounds,
-        block: HappyLayerBuilder.() -> Unit
+        block: HappyLayer.() -> Unit
     ) = transform(
         clip = rect(bounds),
         block = block
     )
 }
 
-internal class HappyLayerBuilderImpl(
+internal class HappyLayerImpl(
     val destination: HappyLevel.Shapes,
 
     override val color: Color = Color(61, 136, 199),
@@ -212,7 +212,7 @@ internal class HappyLayerBuilderImpl(
 
     override val transform: MatrixTransform = Transforms.identical(),
     override val clip: Path? = null,
-) : HappyLayerBuilder {
+) : HappyLayer {
 
     override fun shape(shape: HappyShape) {
         // TODO: apply clip and transform
@@ -231,7 +231,7 @@ internal class HappyLayerBuilderImpl(
         innerCutout: Float,
         transform: MatrixTransform?,
         clip: Path?,
-        block: HappyLayerBuilder.() -> Unit
+        block: HappyLayer.() -> Unit
     ) {
         val fullTransform = if (transform != null) this.transform.post(transform) else this.transform
         // TODO: transform clip
@@ -242,7 +242,7 @@ internal class HappyLayerBuilderImpl(
             else -> this.clip intersect clip
         }
 
-        val builder = HappyLayerBuilderImpl(
+        val builder = HappyLayerImpl(
             destination = destination,
 
             color = color,
