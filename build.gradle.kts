@@ -11,7 +11,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("io.github.mimimishkin:path-utils:1.0.1")
+            implementation(libs.pathUtils)
         }
 
         commonTest.dependencies {

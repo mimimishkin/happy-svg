@@ -1,7 +1,9 @@
 [versions]
 kotlin = "2.1.0"
+pathUtils = "1.0.1"
 
 [libraries]
+pathUtils = { group = "io.github.mimimishkin", name = "path-utils", version.ref = "pathUtils" }
 
 
 [plugins]
