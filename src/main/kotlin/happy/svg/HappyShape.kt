@@ -4,6 +4,7 @@ import happy.svg.HappyWheels.Collision
 import happy.svg.HappyWheels.ShapeType
 import happy.svg.HappyWheels.ShapeType.Circle
 import happy.svg.HappyWheels.ShapeType.Polygon
+import happy.svg.HappyWheels.ShapeType.Triangle
 import happy.svg.HappyWheels.decimal
 import path.utils.math.near
 import path.utils.paths.Bounds
@@ -34,7 +35,9 @@ data class HappyShape(
         checkValid()
 
         type = this@HappyShape.type
-        shapeBounds = bounds
+        shapeBounds = if (type != Triangle) bounds else {
+            bounds.copy().apply { top += 0.165 * h } // happy wheels render triangles with this offset ¯\(0_o)/¯
+        }
         shapeRotation = rotation
         shapeColor = color.decimal
         shapeOutline = outline?.decimal
@@ -125,7 +128,7 @@ fun HappyTriangle(
     density: Float = 1f,
     collision: Collision = Collision.Everything
 ) = HappyShape(
-    type = ShapeType.Triangle,
+    type = Triangle,
     path = null,
     bounds = bounds,
     color = color,
