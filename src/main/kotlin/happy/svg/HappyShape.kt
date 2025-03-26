@@ -90,7 +90,8 @@ fun HappyCircle(
     isFixed: Boolean = false,
     isSleeping: Boolean = false,
     density: Float = 1f,
-    collision: Collision = Collision.Everything
+    collision: Collision = Collision.Everything,
+    innerCutout: Float = 0f
 ) = HappyShape(
     type = Circle,
     path = null,
@@ -102,7 +103,8 @@ fun HappyCircle(
     isFixed = isFixed,
     isSleeping = isSleeping,
     density = density,
-    collision = collision
+    collision = collision,
+    innerCutout = innerCutout
 )
 
 fun HappyTriangle(

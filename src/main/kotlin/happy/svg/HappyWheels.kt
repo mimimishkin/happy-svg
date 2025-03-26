@@ -112,11 +112,12 @@ object HappyWheels  {
         var shapeRotation: Int? = null
         var shapeFixed: Boolean? = null
         var shapeSleeping: Boolean? = null
-        var shapeDensity: Int? = null
+        var shapeDensity: Float? = null
         var shapeColor: Int? = null
         var shapeOutline: Int? = null
         var shapeOpacity: Int? = null
         var shapeCollision: Collision? = null
+        var shapeInnerCutout: Float? = null
         var version: String? = null
         var characterPosition: Vec2? = null
         var character: Character? = null
@@ -169,6 +170,9 @@ object HappyWheels  {
             }
             if (shapeCollision != null) {
                 params += "p11" to shapeCollision!!.number.toString()
+            }
+            if (shapeInnerCutout != null) {
+                params += "p12" to shapeInnerCutout!!.toString()
             }
             if (version != null) {
                 params += "v" to version!!
