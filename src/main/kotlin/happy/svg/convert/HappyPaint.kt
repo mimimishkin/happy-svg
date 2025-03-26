@@ -20,25 +20,28 @@ import java.awt.image.BufferedImage
 import java.awt.image.ColorModel
 import kotlin.math.*
 
-fun interface SadPaint {
+sealed interface HappyPaint {
     fun doFill(
         prefs: HappyPreferences,
         doFill: (path: Path, color: Color) -> Unit
     )
 }
 
-class SadColor(val sad: Path, private val color: Color) : SadPaint {
+class HappyColor(
+    val sad: Path,
+    val color: Color
+) : HappyPaint {
     override fun doFill(prefs: HappyPreferences, doFill: (path: Path, color: Color) -> Unit) {
         doFill(sad, color)
     }
 }
 
-class SadLinearGradient(
+class HappyLinearGradient(
     val start: Vec2,
     val end: Vec2,
     val transform: MatrixTransform,
     val stops: List<Pair<Double, Color>>
-) : SadPaint {
+) : HappyPaint {
     override fun doFill(prefs: HappyPreferences, doFill: (path: Path, color: Color) -> Unit) {
         val length = (end - start).length
         val fullTransform = Transforms
@@ -56,13 +59,13 @@ class SadLinearGradient(
     }
 }
 
-class SadRadialGradient(
+class HappyRadialGradient(
     val center: Vec2,
     val focus: Vec2,
     val radius: Double,
     val transform: MatrixTransform,
     val stops: List<Pair<Double, Color>>
-) : SadPaint {
+) : HappyPaint {
     override fun doFill(prefs: HappyPreferences, doFill: (path: Path, color: Color) -> Unit) {
         Interpolation.doGradient(stops, radius, prefs) { start, end, color ->
             val ringCenter = center * start + focus * (1 - start)
@@ -75,7 +78,10 @@ class SadRadialGradient(
     }
 }
 
-class SadTexture(val fillBounds: Bounds, val texture: AwtPaint) : SadPaint {
+class HappyTexture(
+    val fillBounds: Bounds,
+    val texture: AwtPaint
+) : HappyPaint {
     override fun doFill(prefs: HappyPreferences, doFill: (path: Path, color: Color) -> Unit) {
         if (texture is TexturePaint) {
             val anchorRect = texture.anchorRect.run { Bounds(x, y, width, height) }
@@ -153,14 +159,14 @@ class SadTexture(val fillBounds: Bounds, val texture: AwtPaint) : SadPaint {
     }
 }
 
-fun AwtPaint.toSadPaint(forFigure: Path) = when(this) {
-    is Color -> SadColor(forFigure, this)
+fun AwtPaint.toHappyPaint(forFigure: Path) = when(this) {
+    is Color -> HappyColor(forFigure, this)
 
     is LinearGradientPaint -> {
         if (cycleMethod != NO_CYCLE)
             throw IllegalArgumentException("Cycle methods are not supported yet")
 
-        SadLinearGradient(
+        HappyLinearGradient(
             start = startPoint.run { Vec2(x, y) },
             end = endPoint.run { Vec2(x, y) },
             transform = transform.toMatrixTransform(),
@@ -172,7 +178,7 @@ fun AwtPaint.toSadPaint(forFigure: Path) = when(this) {
         if (cycleMethod != NO_CYCLE)
             throw IllegalArgumentException("Cycle methods are not supported yet")
 
-        SadRadialGradient(
+        HappyRadialGradient(
             center = centerPoint.run { Vec2(x, y) },
             focus = focusPoint.run { Vec2(x, y) },
             radius = radius.toDouble(),
@@ -181,5 +187,5 @@ fun AwtPaint.toSadPaint(forFigure: Path) = when(this) {
         )
     }
 
-    else -> SadTexture(forFigure.bounds, this)
+    else -> HappyTexture(forFigure.bounds, this)
 }

@@ -106,7 +106,7 @@ interface HappyLayer {
     ))
 
     fun polygon(
-        path: HappyPath,
+        path: Path,
         bounds: Bounds = path.bounds,
         color: Color = this.color,
         outline: Color? = this.outline,
@@ -115,7 +115,7 @@ interface HappyLayer {
         density: Float = this.density,
         collision: Collision = this.collision
     ) = shape(HappyPolygon(
-        path = path,
+        path = HappyPath(path),
         bounds = bounds,
         color = color,
         outline = outline,
