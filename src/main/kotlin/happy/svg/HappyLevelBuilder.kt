@@ -1,5 +1,7 @@
 package happy.svg
 
+import happy.svg.convert.HappyPreferences
+
 @DslMarker
 annotation class HappyLevelBuilderDsl
 
@@ -19,7 +21,7 @@ fun happyLevel(block: HappyLevelBuilder.() -> Unit): HappyLevel {
         }
 
         override fun shapes(block: HappyLayer.() -> Unit) {
-            HappyLayerImpl(level.shapes).block()
+            HappyLayerImpl(level.shapes, preferences = HappyPreferences.default).block()
         }
     }
 

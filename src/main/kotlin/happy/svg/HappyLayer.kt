@@ -2,15 +2,11 @@ package happy.svg
 
 import happy.svg.HappyWheels.Collision
 import happy.svg.HappyWheels.ShapeType.*
+import happy.svg.convert.HappyPreferences
 import path.utils.math.MatrixTransform
 import path.utils.math.Transforms
 import path.utils.math.Vec2
-import path.utils.paths.Bounds
-import path.utils.paths.Path
-import path.utils.paths.intersect
-import path.utils.paths.bounds
-import path.utils.paths.path
-import path.utils.paths.rect
+import path.utils.paths.*
 import java.awt.Color
 
 @DslMarker
@@ -20,8 +16,8 @@ annotation class HappyLayerDsl
 interface HappyLayer {
     val color: Color
     val outline: Color?
-    val isInteractive: Boolean
     val rotation: Int
+    val isInteractive: Boolean
     val isFixed: Boolean
     val isSleeping: Boolean
     val density: Float
@@ -30,6 +26,8 @@ interface HappyLayer {
 
     val transform: MatrixTransform
     val clip: Path?
+    val preferences: HappyPreferences
+        get() = HappyPreferences.default
 
     /**
      * Add shape to level, applying [transform] and [clip]
@@ -151,6 +149,8 @@ interface HappyLayer {
 
         transform: MatrixTransform? = null,
         clip: Path? = null,
+        preferences: HappyPreferences? = null,
+
         block: HappyLayer.() -> Unit
     )
 
@@ -221,6 +221,7 @@ internal class HappyLayerImpl(
 
     override val transform: MatrixTransform = Transforms.identical(),
     override val clip: Path? = null,
+    override val preferences: HappyPreferences
 ) : HappyLayer {
 
     override fun shape(shape: HappyShape) {
@@ -240,6 +241,7 @@ internal class HappyLayerImpl(
         innerCutout: Float,
         transform: MatrixTransform?,
         clip: Path?,
+        preferences: HappyPreferences?,
         block: HappyLayer.() -> Unit
     ) {
         val fullTransform = if (transform != null) this.transform.post(transform) else this.transform
@@ -266,6 +268,7 @@ internal class HappyLayerImpl(
 
             transform = fullTransform,
             clip = fullClip,
+            preferences = preferences ?: this.preferences,
         )
 
         builder.block()
