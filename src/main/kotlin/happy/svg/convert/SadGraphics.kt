@@ -1,12 +1,10 @@
 package happy.svg.convert
 
-import com.kitfox.svg.SVGUniverse
+import happy.svg.HappyArt
 import happy.svg.HappyLevel
-import happy.svg.art
+import happy.svg.HappyPath
 import path.utils.paths.*
 import java.awt.Shape
-import java.io.Reader
-import java.util.UUID
 
 class SadGraphics(val prefs: HappyPreferences) : AbstractGraphics2D() {
     private val _layers = mutableListOf<HappyLevel.Shapes>()
@@ -42,9 +40,9 @@ class SadGraphics(val prefs: HappyPreferences) : AbstractGraphics2D() {
 
         if (path.isNotEmpty()) {
             val layer = HappyLevel.Shapes()
-            foreground.toSadPaint(path).doFill(prefs) { fill, color ->
+            foreground.toHappyPaint(path).doFill(prefs) { fill, color ->
                 val fill = if (fill == path) fill else fill intersect path
-                layer.art(fill, color)
+                layer.shapes += HappyArt(HappyPath(fill), color)
             }
             _layers += layer
         }
