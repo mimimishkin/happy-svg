@@ -11,7 +11,7 @@ data class HappyLevel(
     val shapes: Shapes = Shapes()
 ) : HappyWheels.Format {
     data class Info(
-        var version: String = "1.94",
+        var version: String = "1.97",
         var characterPosition: Vec2 = Vec2(20000.0, 10000.0),
         var character: Character = Character.IrresponsibleDad,
         var forceCharacter: Boolean = false,
