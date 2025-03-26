@@ -41,7 +41,7 @@ class SadGraphics(val prefs: HappyPreferences) : AbstractGraphics2D() {
         if (path.isNotEmpty()) {
             val layer = HappyLevel.Shapes()
             foreground.toHappyPaint(path).doFill(prefs) { fill, color ->
-                val fill = if (fill == path) fill else fill intersect path
+                val fill = fill intersect path
                 layer.shapes += HappyArt(HappyPath(fill), color)
             }
             _layers += layer

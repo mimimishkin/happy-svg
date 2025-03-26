@@ -218,4 +218,6 @@ object HappyWheels  {
     val Double.scaled get() = "%.3f".format(this)
 
     val Color.decimal get() = red * 256 * 256 + green * 256 + blue
+
+    val levelBounds = Bounds(0.0, 0.0, 20000.0, 10000.0)
 }

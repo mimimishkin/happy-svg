@@ -1,5 +1,6 @@
 package happy.svg.convert
 
+import happy.svg.HappyWheels
 import path.utils.math.MatrixTransform
 import path.utils.math.Transforms
 import path.utils.math.Vec2
@@ -23,16 +24,15 @@ import kotlin.math.*
 sealed interface HappyPaint {
     fun doFill(
         prefs: HappyPreferences,
-        doFill: (path: Path, color: Color) -> Unit
+        doFill: (part: Path, color: Color) -> Unit
     )
 }
 
 class HappyColor(
-    val sad: Path,
     val color: Color
 ) : HappyPaint {
-    override fun doFill(prefs: HappyPreferences, doFill: (path: Path, color: Color) -> Unit) {
-        doFill(sad, color)
+    override fun doFill(prefs: HappyPreferences, doFill: (part: Path, color: Color) -> Unit) {
+        doFill(rect(HappyWheels.levelBounds), color)
     }
 }
 
@@ -42,7 +42,7 @@ class HappyLinearGradient(
     val transform: MatrixTransform,
     val stops: List<Pair<Double, Color>>
 ) : HappyPaint {
-    override fun doFill(prefs: HappyPreferences, doFill: (path: Path, color: Color) -> Unit) {
+    override fun doFill(prefs: HappyPreferences, doFill: (part: Path, color: Color) -> Unit) {
         val length = (end - start).length
         val fullTransform = Transforms
             .rotate(atan2(end.y - start.y, end.x - start.x))
@@ -66,7 +66,7 @@ class HappyRadialGradient(
     val transform: MatrixTransform,
     val stops: List<Pair<Double, Color>>
 ) : HappyPaint {
-    override fun doFill(prefs: HappyPreferences, doFill: (path: Path, color: Color) -> Unit) {
+    override fun doFill(prefs: HappyPreferences, doFill: (part: Path, color: Color) -> Unit) {
         Interpolation.doGradient(stops, radius, prefs) { start, end, color ->
             val ringCenter = center * start + focus * (1 - start)
             val outRadius = max(0.0, radius * start - prefs.additionalGradientPartSize)
@@ -82,7 +82,7 @@ class HappyTexture(
     val fillBounds: Bounds,
     val texture: AwtPaint
 ) : HappyPaint {
-    override fun doFill(prefs: HappyPreferences, doFill: (path: Path, color: Color) -> Unit) {
+    override fun doFill(prefs: HappyPreferences, doFill: (part: Path, color: Color) -> Unit) {
         if (texture is TexturePaint) {
             val anchorRect = texture.anchorRect.run { Bounds(x, y, width, height) }
 
@@ -160,7 +160,7 @@ class HappyTexture(
 }
 
 fun AwtPaint.toHappyPaint(forFigure: Path) = when(this) {
-    is Color -> HappyColor(forFigure, this)
+    is Color -> HappyColor(this)
 
     is LinearGradientPaint -> {
         if (cycleMethod != NO_CYCLE)
