@@ -2,23 +2,27 @@ package happy.svg
 
 import happy.svg.HappyWheels.Collision
 import happy.svg.HappyWheels.ShapeType
+import happy.svg.HappyWheels.ShapeType.Circle
+import happy.svg.HappyWheels.ShapeType.Polygon
 import happy.svg.HappyWheels.decimal
+import path.utils.paths.Bounds
 import java.awt.Color
 import kotlin.math.roundToInt
 
+// TODO: rearrange params like at the game
 data class HappyShape(
     var type: ShapeType,
-    val path: HappyPath?, // TODO: do we need `val`?
+    var path: HappyPath?, // TODO: why do we need `val`?
+    var bounds: Bounds,
+    var rotation: Int = 0,
     var color: Color,
     var outline: Color? = null,
     var isInteractive: Boolean = false,
-    var rotation: Int = 0, // TODO: possibly delete when we have a `path`
     var isFixed: Boolean = false,
     var isSleeping: Boolean = false,
-    var density: Int = 1,
-    var collision: Collision = Collision.Everything
-
-    // TODO: x, y, width, height, scale factor, ring
+    var density: Float = 1f,
+    var collision: Collision = Collision.Everything,
+    var innerCutout: Float = 0f,
 ) : HappyWheels.Format {
     override val tag = "sh"
 
@@ -27,41 +31,50 @@ data class HappyShape(
 
     override fun HappyWheels.Config.configure() {
         type = this@HappyShape.type
-        shapeInteractive = isInteractive
-        if (path != null) {
-            shapeBounds = path.bounds
-        }
+        shapeBounds = bounds
         shapeRotation = rotation
-        shapeFixed = isFixed
-        shapeSleeping = isSleeping
-        shapeDensity = density
         shapeColor = color.decimal
         shapeOutline = outline?.decimal
         shapeOpacity = (color.alpha / 255f * 100).roundToInt()
+        if (type != Polygon) {
+            shapeInteractive = isInteractive
+        }
+        shapeFixed = isFixed
+        shapeSleeping = isSleeping
+        shapeDensity = density
         shapeCollision = Collision.Everything
+        if (type == Circle) {
+            shapeInnerCutout = innerCutout
+        }
     }
 
     fun checkValid() {
-        // TODO:
+        if (path == null) {
+            check(rotation == 0) { "Rotating a custom shape is not supported. Transform path instead" }
+        }
+
+        check(density in 0.1..100.0) { "Density must be between 0.1 and 100" }
     }
 }
 
 fun HappyRectangle(
+    bounds: Bounds,
     color: Color,
     outline: Color? = null,
-    isInteractive: Boolean = false,
     rotation: Int = 0,
+    isInteractive: Boolean = false,
     isFixed: Boolean = false,
     isSleeping: Boolean = false,
-    density: Int = 1,
+    density: Float = 1f,
     collision: Collision = Collision.Everything
 ) = HappyShape(
     type = ShapeType.Rectangle,
     path = null,
+    bounds = bounds,
     color = color,
     outline = outline,
-    isInteractive = isInteractive,
     rotation = rotation,
+    isInteractive = isInteractive,
     isFixed = isFixed,
     isSleeping = isSleeping,
     density = density,
@@ -69,21 +82,23 @@ fun HappyRectangle(
 )
 
 fun HappyCircle(
+    bounds: Bounds,
     color: Color,
     outline: Color? = null,
-    isInteractive: Boolean = false,
     rotation: Int = 0,
+    isInteractive: Boolean = false,
     isFixed: Boolean = false,
     isSleeping: Boolean = false,
-    density: Int = 1,
+    density: Float = 1f,
     collision: Collision = Collision.Everything
 ) = HappyShape(
-    type = ShapeType.Circle,
+    type = Circle,
     path = null,
+    bounds = bounds,
     color = color,
     outline = outline,
-    isInteractive = isInteractive,
     rotation = rotation,
+    isInteractive = isInteractive,
     isFixed = isFixed,
     isSleeping = isSleeping,
     density = density,
@@ -91,44 +106,46 @@ fun HappyCircle(
 )
 
 fun HappyTriangle(
+    bounds: Bounds,
     color: Color,
     outline: Color? = null,
-    isInteractive: Boolean = false,
     rotation: Int = 0,
+    isInteractive: Boolean = false,
     isFixed: Boolean = false,
     isSleeping: Boolean = false,
-    density: Int = 1,
+    density: Float = 1f,
     collision: Collision = Collision.Everything
 ) = HappyShape(
     type = ShapeType.Triangle,
     path = null,
+    bounds = bounds,
     color = color,
     outline = outline,
-    isInteractive = isInteractive,
     rotation = rotation,
+    isInteractive = isInteractive,
     isFixed = isFixed,
     isSleeping = isSleeping,
     density = density,
     collision = collision
 )
 
+// TODO: 1. check for flat path 
+// TODO: 2. check for max node count - 10
 fun HappyPolygon(
     path: HappyPath,
+    bounds: Bounds = path.bounds,
     color: Color,
     outline: Color? = null,
-    isInteractive: Boolean = false,
-    rotation: Int = 0,
     isFixed: Boolean = false,
     isSleeping: Boolean = false,
-    density: Int = 1,
-    collision: Collision = Collision.Everything
+    density: Float = 1f,
+    collision: Collision = Collision.Everything,
 ) = HappyShape(
-    type = ShapeType.Polygon,
+    type = Polygon,
     path = path,
+    bounds = bounds,
     color = color,
     outline = outline,
-    isInteractive = isInteractive,
-    rotation = rotation,
     isFixed = isFixed,
     isSleeping = isSleeping,
     density = density,
@@ -139,11 +156,11 @@ fun HappyArt(
     path: HappyPath,
     color: Color,
     outline: Color? = null,
-    rotation: Int
+    bounds: Bounds = path.bounds,
 ) = HappyShape(
     type = ShapeType.Art,
     path = path,
+    bounds = bounds,
     color = color,
     outline = outline,
-    rotation = rotation,
 )
