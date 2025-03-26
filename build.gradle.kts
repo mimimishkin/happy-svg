@@ -1,23 +1,18 @@
 plugins {
-    alias(libs.plugins.kotlinMultiplatform)
+    alias(libs.plugins.kotlin)
 }
 
 group = "io.github.mimimishkin"
 version = "1.0.0"
 description = "Create Happy Wheels levels in Kotlin"
 
-kotlin {
-    jvm()
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
 
-    sourceSets {
-        commonMain.dependencies {
-            implementation(libs.pathUtils)
-        }
-
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-        }
-
-    }
-
+dependencies {
+    implementation(libs.pathUtils)
+    implementation(libs.svgSalamander)
+    implementation(libs.imageTracer)
 }
