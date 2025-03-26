@@ -1,14 +1,13 @@
 package happy.svg.convert
 
-import happy.svg.HappyArt
+import happy.svg.HappyLayerImpl
 import happy.svg.HappyLevel
-import happy.svg.HappyPath
+import happy.svg.art
 import path.utils.paths.*
 import java.awt.Shape
 
-class SadGraphics(val prefs: HappyPreferences) : AbstractGraphics2D() {
-    private val _layers = mutableListOf<HappyLevel.Shapes>()
-    val layers: List<HappyLevel.Shapes> = _layers
+class HappyGraphics(destination: HappyLevel.Shapes, preferences: HappyPreferences) : AbstractGraphics2D() {
+    private val layer = HappyLayerImpl(destination, preferences = preferences)
 
     private var wasClipped = false
     private var pathClip: Path? = null
@@ -39,12 +38,9 @@ class SadGraphics(val prefs: HappyPreferences) : AbstractGraphics2D() {
             .let { pathClip?.intersect(it) ?: it }
 
         if (path.isNotEmpty()) {
-            val layer = HappyLevel.Shapes()
-            foreground.toHappyPaint(path).doFill(prefs) { fill, color ->
-                val fill = fill intersect path
-                layer.shapes += HappyArt(HappyPath(fill), color)
-            }
-            _layers += layer
+            val happyPaint = foreground.toHappyPaint(path)
+
+            layer.art(path, happyPaint)
         }
     }
 }
