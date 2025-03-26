@@ -245,7 +245,6 @@ internal class HappyLayerImpl(
         block: HappyLayer.() -> Unit
     ) {
         val fullTransform = if (transform != null) this.transform.post(transform) else this.transform
-        // TODO: transform clip
         val fullClip = when {
             this.clip == null && clip == null -> null
             this.clip == null -> clip
@@ -267,7 +266,7 @@ internal class HappyLayerImpl(
             innerCutout = innerCutout,
 
             transform = fullTransform,
-            clip = fullClip,
+            clip = fullClip?.transformWith(fullTransform),
             preferences = preferences ?: this.preferences,
         )
 
