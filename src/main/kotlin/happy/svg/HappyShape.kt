@@ -5,6 +5,7 @@ import happy.svg.HappyWheels.ShapeType
 import happy.svg.HappyWheels.ShapeType.Circle
 import happy.svg.HappyWheels.ShapeType.Polygon
 import happy.svg.HappyWheels.decimal
+import path.utils.math.near
 import path.utils.paths.Bounds
 import java.awt.Color
 import kotlin.math.roundToInt
@@ -30,6 +31,8 @@ data class HappyShape(
         get() = path?.format().orEmpty()
 
     override fun HappyWheels.Config.configure() {
+        checkValid()
+
         type = this@HappyShape.type
         shapeBounds = bounds
         shapeRotation = rotation
@@ -54,6 +57,10 @@ data class HappyShape(
         }
 
         check(density in 0.1..100.0) { "Density must be between 0.1 and 100" }
+
+        if (type == Circle) {
+            check(bounds.w near bounds.h) { "Can't draw ellipse, only circles" }
+        }
     }
 }
 
