@@ -165,11 +165,11 @@ abstract class AbstractGraphics2D : Graphics2D() {
 //
 //        composite = oldMode
 //        foreground = oldForeground
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 
     override fun copyArea(x: Int, y: Int, width: Int, height: Int, dx: Int, dy: Int) {
-        TODO("Not yet implemented")
+        throw NotImplementedError()
     }
 }
 
@@ -179,7 +179,7 @@ abstract class AbstractGraphics2D : Graphics2D() {
 // ------------------------------------------                      ------------------------------------------
 // ----------------------------------------------------------------------------------------------------------
 
-internal class XorComposite(val xorColor: Color) : Composite {
+class XorComposite(val xorColor: Color) : Composite {
     override fun createContext(
         srcColorModel: ColorModel,
         dstColorModel: ColorModel,
@@ -217,7 +217,7 @@ internal class XorComposite(val xorColor: Color) : Composite {
     }
 }
 
-internal fun RenderedImage.toBuffered(): BufferedImage {
+fun RenderedImage.toBuffered(): BufferedImage {
     if (this is BufferedImage)
         return this
 
@@ -228,7 +228,7 @@ internal fun RenderedImage.toBuffered(): BufferedImage {
     return BufferedImage(colorModel, raster, isAlphaPremultiplied, properties)
 }
 
-internal fun Image.toBuffered(): BufferedImage {
+fun Image.toBuffered(): BufferedImage {
     if (this is BufferedImage)
         return this
     if (this is RenderedImage)
@@ -270,7 +270,6 @@ val Image.hasAlpha: Boolean get() =
             false
         }
     }
-
 
 fun Image.scale(width: Int, height: Int) = getScaledInstance(width, height, SCALE_SMOOTH)
 fun Image.transform(xform: AffineTransform, hints: RenderingHints): BufferedImage {
