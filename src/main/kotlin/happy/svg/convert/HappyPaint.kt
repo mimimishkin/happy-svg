@@ -191,7 +191,7 @@ fun AwtPaint.toHappyPaint(): HappyPaint? = when(this) {
     else -> null
 }
 
-fun AwtPaint.toHappyPaint(forFigure: Path) = when(this) {
+fun AwtPaint.toHappyPaint(anchor: Bounds) = when(this) {
     is Color, is LinearGradientPaint, is RadialGradientPaint -> toHappyPaint()!!
-    else -> HappyTexture(forFigure.bounds, this)
+    else -> HappyTexture(anchor, this)
 }

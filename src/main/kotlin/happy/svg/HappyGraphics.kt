@@ -6,6 +6,7 @@ import happy.svg.convert.HappyPreferences
 import happy.svg.convert.toHappyPaint
 import path.utils.math.MatrixTransform
 import path.utils.paths.Path
+import path.utils.paths.bounds
 import path.utils.paths.intersect
 import path.utils.paths.toMatrixTransform
 import path.utils.paths.toPath
@@ -62,7 +63,7 @@ internal class HappyGraphics(destination: HappyLevel.Shapes, preferences: HappyP
             .let { pathClip?.intersect(it) ?: it }
 
         if (path.isNotEmpty()) {
-            layer.art(path, happyPaint ?: foreground.toHappyPaint(path))
+            layer.art(path, happyPaint ?: foreground.toHappyPaint(path.bounds))
         }
     }
 }
