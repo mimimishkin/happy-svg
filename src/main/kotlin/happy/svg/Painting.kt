@@ -7,6 +7,7 @@ import happy.svg.convert.HappyPaint
 import happy.svg.convert.HappyPreferences
 import happy.svg.convert.HappyTexture
 import happy.svg.convert.toHappyPaint
+import path.utils.math.Transforms
 import path.utils.math.near
 import path.utils.paths.*
 import java.awt.Color
@@ -144,7 +145,15 @@ fun HappyLayer.picture(
 }
 
 fun HappyLayer.picture(
-    image: SVGDiagram
+    image: SVGDiagram,
+    bounds: Bounds? = null,
 ) {
-    image.render(HappyGraphics(this))
+    val viewport = image.viewRect.run { Bounds(x, y, width, height) }
+    if (bounds != null) {
+        transform(Transforms.rectToRect(viewport, bounds)) {
+            image.render(HappyGraphics(this))
+        }
+    } else {
+        image.render(HappyGraphics(this))
+    }
 }
