@@ -210,7 +210,7 @@ object HappyWheels  {
         }
     }
 
-    // TODO: use this 
+    // TODO: optimize render removing shapes lower than this
     const val minVisibleAlpha = 2.55
 
     const val minVisibleArea = 2.0

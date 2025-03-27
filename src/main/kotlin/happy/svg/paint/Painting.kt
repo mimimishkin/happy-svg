@@ -16,8 +16,11 @@ import java.io.File
 import java.io.Reader
 import java.net.URI
 import java.net.URL
-import java.util.UUID
+import java.util.*
 import javax.imageio.ImageIO
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 inline fun HappyPaint.fill(
     path: Path?,
@@ -87,17 +90,40 @@ fun HappyLayer.circle(
     collision: Collision = this.collision,
     innerCutout: Float = this.innerCutout
 ) {
-    require(!isInteractive || innerCutout == 0f) { "Can't draw interactive ring" }
+    fun simpleRingSector(cx: Double, cy: Double, outRadius: Double, innerRadius: Double, start: Double, end: Double) = mutablePath()
+        .moveTo(cx + outRadius * cos(start), cy + outRadius * sin(start))
+//        .arcTo(outRadius, outRadius, 0.0, false, true, cx + outRadius * cos(end), cy + outRadius * sin(end))
+        .lineTo(cx + outRadius * cos(end), cy + outRadius * sin(end))
+        .lineTo(cx + innerRadius * cos(end), cy + innerRadius * sin(end))
+//        .arcTo(innerRadius, innerRadius, 0.0, false, false, cx + innerRadius * cos(start), cy + innerRadius * sin(start))
+        .lineTo(cx + innerRadius * cos(start), cy + innerRadius * sin(start))
+        .close()
+
     require(bounds.w near bounds.h) { "Can't draw ellipse, only circles" }
 
-    val circle = if (innerCutout == 0f) {
-        circle(bounds.cx, bounds.cy, bounds.w / 2)
+    val radius = bounds.w / 2
+    if (innerCutout == 0f) {
+        val circle = circle(bounds.cx, bounds.cy, radius)
+        possiblyInteractiveShape(circle, paint, isInteractive, isFixed, isSleeping, density, collision)
     } else {
         val rightScale = innerCutout / 100 * (1 - 0.015)
-        ring(bounds.cx, bounds.cy, bounds.w / 2, rightScale * (bounds.w / 2))
-    }
+        val outRadius = rightScale * radius
 
-    possiblyInteractiveShape(circle, paint, isInteractive, isFixed, isSleeping, density, collision)
+        if (!isInteractive) {
+            val ring = ring(bounds.cx, bounds.cy, radius, outRadius)
+            art(ring, paint)
+        } else {
+            val sectorsCount = (2 * PI * radius / (preferences.minCurveLength - 0.5)).toInt() // add -0.5 to guarantee turning into lines
+            val step = 2 * PI / sectorsCount
+            for (i in 0 until sectorsCount) {
+                val start = i * step
+                val end = (i + 1) * step
+                val sector = simpleRingSector(bounds.cx, bounds.cy, radius, outRadius, start, end)
+
+                polygon(sector, paint, isFixed, isSleeping, density, collision)
+            }
+        }
+    }
 }
 
 fun HappyLayer.triangle(
@@ -109,12 +135,11 @@ fun HappyLayer.triangle(
     density: Float = this.density,
     collision: Collision = this.collision
 ) {
-    val triangle = mutablePath().apply {
-        moveTo(bounds.left, bounds.bottom)
-        lineTo(bounds.cx, bounds.top)
-        lineTo(bounds.right, bounds.bottom)
-        close()
-    }
+    val triangle = mutablePath()
+        .moveTo(bounds.left, bounds.bottom)
+        .lineTo(bounds.cx, bounds.top)
+        .lineTo(bounds.right, bounds.bottom)
+        .close()
 
     possiblyInteractiveShape(triangle, paint, isInteractive, isFixed, isSleeping, density, collision)
 }

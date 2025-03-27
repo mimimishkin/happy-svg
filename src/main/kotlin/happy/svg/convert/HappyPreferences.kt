@@ -1,5 +1,6 @@
 package happy.svg.convert
 
+import happy.svg.HappyWheels
 import java.awt.RenderingHints
 
 data class HappyPreferences(
@@ -30,7 +31,11 @@ data class HappyPreferences(
     /**
      * do vectorizing or not
      */
-    var doVectorizing: Boolean
+    var doVectorizing: Boolean,
+    /**
+     * curves with length less than this will turn into lines
+     */
+    var minCurveLength: Double,
 ) {
     companion object {
         val default = HappyPreferences(
@@ -40,7 +45,8 @@ data class HappyPreferences(
             additionalGradientPartSize = 0.1,
             hints = RenderingHints(null),
             pixelSize = 5.0,
-            doVectorizing = true
+            doVectorizing = true,
+            minCurveLength = 5.5
         )
     }
 }
