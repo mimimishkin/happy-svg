@@ -36,7 +36,7 @@ data class HappyShape(
 
         type = this@HappyShape.type
         shapeBounds = if (type != Triangle) bounds else {
-            bounds.copy().apply { top += 0.165 * h } // happy wheels render triangles with this offset ¯\(0_o)/¯
+            bounds.copy().apply { top += (1.0 / 6.0) * h } // happy wheels render triangles with this offset ¯\(0_o)/¯
         }
         shapeRotation = rotation
         shapeColor = color.decimal
