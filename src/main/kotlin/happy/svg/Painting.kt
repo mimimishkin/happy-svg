@@ -18,15 +18,17 @@ import path.utils.paths.ring
 import java.awt.Color
 
 inline fun HappyPaint.fill(
-    path: Path,
+    path: Path?,
     prefs: HappyPreferences,
     crossinline doFill: (part: Path, color: Color) -> Unit
 ) {
+    require(path != null || this is HappyTexture) { "Path is required to paint along it" }
+
     if (this is HappyColor)
-        return doFill(path, color)
+        return doFill(path!!, color)
 
     doFill(prefs) { part, color ->
-        doFill(part intersect path, color)
+        doFill(if (path != null) part and path else part, color)
     }
 }
 
