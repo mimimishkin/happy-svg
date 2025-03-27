@@ -37,19 +37,18 @@ object HappyWheels  {
         }
     }
 
-    // TODO: remove icon from here
-    enum class Character(val number: Int, val icon: File) {
-        WheelchairGuy(1, File("src/jvmMain/resources/characters/WheelchairGuy.svg")),
-        SegwayGuy(2, File("src/jvmMain/resources/characters/SegwayGuy.svg")),
-        IrresponsibleDad(3, File("src/jvmMain/resources/characters/IrresponsibleDad.svg")),
-        EffectiveShopper(4, File("src/jvmMain/resources/characters/EffectiveShopper.svg")),
-        MopedCouple(5, File("src/jvmMain/resources/characters/MopedCouple.svg")),
-        LawnmowerMan(6, File("src/jvmMain/resources/characters/LawnmowerMan.svg")),
-        ExplorerGuy(7, File("src/jvmMain/resources/characters/ExplorerGuy.svg")),
-        SantaClaus(8, File("src/jvmMain/resources/characters/SantaClaus.svg")),
-        PogostickMan(9, File("src/jvmMain/resources/characters/PogostickMan.svg")),
-        IrresponsibleMom(10, File("src/jvmMain/resources/characters/IrresponsibleMom.svg")),
-        HelicopterMan(11, File("src/jvmMain/resources/characters/HelicopterMan.svg")),
+    enum class Character(val number: Int) {
+        WheelchairGuy(1),
+        SegwayGuy(2),
+        IrresponsibleDad(3),
+        EffectiveShopper(4),
+        MopedCouple(5),
+        LawnmowerMan(6),
+        ExplorerGuy(7),
+        SantaClaus(8),
+        PogostickMan(9),
+        IrresponsibleMom(10),
+        HelicopterMan(11),
     }
 
     enum class Background(val number: Int) {
