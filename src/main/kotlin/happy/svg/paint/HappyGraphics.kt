@@ -1,8 +1,6 @@
-package happy.svg
+package happy.svg.paint
 
-import happy.svg.convert.AbstractGraphics2D
-import happy.svg.convert.HappyPaint
-import happy.svg.convert.toHappyPaint
+import happy.svg.HappyLayer
 import path.utils.math.MatrixTransform
 import path.utils.paths.*
 import java.awt.Paint

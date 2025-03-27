@@ -1,6 +1,9 @@
-package happy.svg.convert
+package happy.svg.paint
 
 import happy.svg.HappyWheels
+import happy.svg.convert.HappyPreferences
+import happy.svg.convert.Interpolation
+import happy.svg.convert.Vectorizing
 import path.utils.math.MatrixTransform
 import path.utils.math.Transforms
 import path.utils.math.Vec2
@@ -19,7 +22,6 @@ import java.awt.TexturePaint
 import java.awt.geom.Rectangle2D
 import java.awt.image.BufferedImage
 import java.awt.image.ColorModel
-import kotlin.contracts.contract
 import kotlin.math.*
 
 sealed interface HappyPaint {

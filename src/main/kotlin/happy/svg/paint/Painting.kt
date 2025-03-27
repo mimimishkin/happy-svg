@@ -1,13 +1,10 @@
-package happy.svg
+package happy.svg.paint
 
 import com.kitfox.svg.SVGDiagram
 import com.kitfox.svg.SVGUniverse
+import happy.svg.HappyLayer
 import happy.svg.HappyWheels.Collision
-import happy.svg.convert.HappyColor
-import happy.svg.convert.HappyPaint
 import happy.svg.convert.HappyPreferences
-import happy.svg.convert.HappyTexture
-import happy.svg.convert.toHappyPaint
 import path.utils.math.Transforms
 import path.utils.math.near
 import path.utils.paths.*
@@ -19,7 +16,6 @@ import java.io.File
 import java.io.Reader
 import java.net.URI
 import java.net.URL
-import java.net.URLConnection
 import java.util.UUID
 import javax.imageio.ImageIO
 
@@ -95,7 +91,7 @@ fun HappyLayer.circle(
     require(bounds.w near bounds.h) { "Can't draw ellipse, only circles" }
 
     val circle = if (innerCutout == 0f) {
-        path.utils.paths.circle(bounds.cx, bounds.cy, bounds.w / 2)
+        circle(bounds.cx, bounds.cy, bounds.w / 2)
     } else {
         val rightScale = innerCutout / 100 * (1 - 0.015)
         ring(bounds.cx, bounds.cy, bounds.w / 2, rightScale * (bounds.w / 2))

@@ -1,4 +1,4 @@
-package happy.svg.convert;
+package happy.svg.paint
 
 import java.awt.*
 import java.awt.RenderingHints.*
@@ -12,6 +12,7 @@ import java.awt.image.renderable.RenderableImage
 import java.text.AttributedCharacterIterator
 import java.util.*
 import javax.swing.ImageIcon
+import kotlin.collections.iterator
 import kotlin.math.abs
 import kotlin.math.min
 import java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment as localGraphicsEnvironment
