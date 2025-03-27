@@ -19,6 +19,7 @@ import java.awt.TexturePaint
 import java.awt.geom.Rectangle2D
 import java.awt.image.BufferedImage
 import java.awt.image.ColorModel
+import kotlin.contracts.contract
 import kotlin.math.*
 
 sealed interface HappyPaint {
@@ -159,7 +160,7 @@ class HappyTexture(
     }
 }
 
-fun AwtPaint.toHappyPaint(forFigure: Path) = when(this) {
+fun AwtPaint.toHappyPaint(): HappyPaint? = when(this) {
     is Color -> HappyColor(this)
 
     is LinearGradientPaint -> {
@@ -187,5 +188,10 @@ fun AwtPaint.toHappyPaint(forFigure: Path) = when(this) {
         )
     }
 
+    else -> null
+}
+
+fun AwtPaint.toHappyPaint(forFigure: Path) = when(this) {
+    is Color, is LinearGradientPaint, is RadialGradientPaint -> toHappyPaint()!!
     else -> HappyTexture(forFigure.bounds, this)
 }
