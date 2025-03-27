@@ -2,21 +2,14 @@ package happy.svg
 
 import happy.svg.convert.AbstractGraphics2D
 import happy.svg.convert.HappyPaint
-import happy.svg.convert.HappyPreferences
 import happy.svg.convert.toHappyPaint
 import path.utils.math.MatrixTransform
-import path.utils.paths.Path
-import path.utils.paths.bounds
-import path.utils.paths.intersect
-import path.utils.paths.toMatrixTransform
-import path.utils.paths.toPath
-import path.utils.paths.transformWith
+import path.utils.paths.*
 import java.awt.Paint
 import java.awt.Shape
 import java.awt.geom.AffineTransform
 
-internal class HappyGraphics(destination: HappyLevel.Shapes, preferences: HappyPreferences) : AbstractGraphics2D() {
-    private val layer = HappyLayerImpl(destination, preferences = preferences)
+internal class HappyGraphics(val destination: HappyLayer) : AbstractGraphics2D() {
     private var pathClip: Path? = null
     private var matrixTransform = MatrixTransform()
     private var happyPaint: HappyPaint? = null
@@ -63,7 +56,7 @@ internal class HappyGraphics(destination: HappyLevel.Shapes, preferences: HappyP
             .let { pathClip?.intersect(it) ?: it }
 
         if (path.isNotEmpty()) {
-            layer.art(path, happyPaint ?: foreground.toHappyPaint(path.bounds))
+            destination.art(path, happyPaint ?: foreground.toHappyPaint(path.bounds))
         }
     }
 }
