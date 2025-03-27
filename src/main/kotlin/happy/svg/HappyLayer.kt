@@ -106,29 +106,29 @@ interface HappyLayer {
 
     fun polygon(
         path: Path,
-        bounds: Bounds = path.bounds,
         color: Color = this.color,
         outline: Color? = this.outline,
         isFixed: Boolean = this.isFixed,
         isSleeping: Boolean = this.isSleeping,
         density: Float = this.density,
-        collision: Collision = this.collision
+        collision: Collision = this.collision,
+        bounds: Bounds = path.bounds
     ) = shape(HappyPolygon(
         path = HappyPath(path),
-        bounds = bounds,
         color = color,
         outline = outline,
         isFixed = isFixed,
         isSleeping = isSleeping,
         density = density,
-        collision = collision
+        collision = collision,
+        bounds = bounds,
     ))
 
     fun art(
         path: Path,
-        bounds: Bounds = path.bounds,
         color: Color = this.color,
         outline: Color? = this.outline,
+        bounds: Bounds = path.bounds,
     ) = shape(HappyArt(
         path = HappyPath(path),
         bounds = bounds,

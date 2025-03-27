@@ -41,9 +41,9 @@ fun HappyLayer.possiblyInteractiveShape(
     collision: Collision = this.collision
 ) {
     if (isInteractive) {
-        polygon(path, path.bounds, color, outline, isFixed, isSleeping, density, collision)
+        polygon(path, color, outline, isFixed, isSleeping, density, collision, path.bounds)
     } else {
-        art(path, path.bounds, color, outline)
+        art(path, color, outline, path.bounds)
     }
 }
 
