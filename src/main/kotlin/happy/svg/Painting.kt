@@ -1,21 +1,18 @@
 package happy.svg
 
+import com.kitfox.svg.SVGDiagram
 import happy.svg.HappyWheels.Collision
 import happy.svg.convert.HappyColor
 import happy.svg.convert.HappyPaint
 import happy.svg.convert.HappyPreferences
+import happy.svg.convert.HappyTexture
+import happy.svg.convert.toHappyPaint
 import path.utils.math.near
-import path.utils.paths.Bounds
-import path.utils.paths.Path
-import path.utils.paths.intersect
-import path.utils.paths.bounds
-import path.utils.paths.close
-import path.utils.paths.lineTo
-import path.utils.paths.moveTo
-import path.utils.paths.mutablePath
-import path.utils.paths.rect
-import path.utils.paths.ring
+import path.utils.paths.*
 import java.awt.Color
+import java.awt.TexturePaint
+import java.awt.geom.Rectangle2D
+import java.awt.image.BufferedImage
 
 inline fun HappyPaint.fill(
     path: Path?,
@@ -135,6 +132,19 @@ fun HappyLayer.art(
     possiblyInteractiveShape(path, paint, false)
 }
 
-fun HappyLayer.picture() {
-    TODO()
+fun HappyLayer.picture(
+    image: BufferedImage,
+    anchor: Bounds = image.run { Bounds(0.0, 0.0, width.toDouble(), height.toDouble()) },
+) {
+    val texture = TexturePaint(image, anchor.run { Rectangle2D.Double(x, y, w, h) })
+    val paint = texture.toHappyPaint(anchor)
+    paint.fill(null, preferences) { part, color ->
+        art(part, color)
+    }
+}
+
+fun HappyLayer.picture(
+    image: SVGDiagram
+) {
+    image.render(HappyGraphics(this))
 }
