@@ -1,6 +1,7 @@
 package happy.svg
 
 import com.kitfox.svg.SVGDiagram
+import com.kitfox.svg.SVGUniverse
 import happy.svg.HappyWheels.Collision
 import happy.svg.convert.HappyColor
 import happy.svg.convert.HappyPaint
@@ -14,6 +15,13 @@ import java.awt.Color
 import java.awt.TexturePaint
 import java.awt.geom.Rectangle2D
 import java.awt.image.BufferedImage
+import java.io.File
+import java.io.Reader
+import java.net.URI
+import java.net.URL
+import java.net.URLConnection
+import java.util.UUID
+import javax.imageio.ImageIO
 
 inline fun HappyPaint.fill(
     path: Path?,
@@ -135,8 +143,9 @@ fun HappyLayer.art(
 
 fun HappyLayer.picture(
     image: BufferedImage,
-    anchor: Bounds = image.run { Bounds(0.0, 0.0, width.toDouble(), height.toDouble()) },
+    anchor: Bounds? = null,
 ) {
+    val anchor = anchor ?: image.run { Bounds(0.0, 0.0, width.toDouble(), height.toDouble()) }
     val texture = TexturePaint(image, anchor.run { Rectangle2D.Double(x, y, w, h) })
     val paint = texture.toHappyPaint(anchor)
     paint.fill(null, preferences) { part, color ->
@@ -156,4 +165,54 @@ fun HappyLayer.picture(
     } else {
         image.render(HappyGraphics(this))
     }
+}
+
+private val universe = SVGUniverse()
+
+internal fun SVGDiagram(reader: Reader): SVGDiagram {
+    val uri = universe.loadSVG(reader, UUID.randomUUID().toString())
+    return universe.getDiagram(uri)
+}
+
+fun HappyLayer.picture(
+    image: File,
+    bounds: Bounds? = null,
+    isSvg: Boolean = true
+) {
+    if (isSvg) {
+        picture(SVGDiagram(image.reader()), bounds)
+    } else {
+        picture(ImageIO.read(image), bounds)
+    }
+}
+
+fun HappyLayer.picture(
+    image: URL,
+    bounds: Bounds? = null,
+    isSvg: Boolean = true
+) {
+    val inputStream = image.openStream()
+    if (isSvg) {
+        picture(SVGDiagram(inputStream.reader()), bounds)
+    } else {
+        picture(ImageIO.read(inputStream), bounds)
+    }
+}
+
+fun HappyLayer.picture(
+    image: String,
+    bounds: Bounds? = null,
+    isSvg: Boolean = true
+) {
+    val file = File(image)
+    if (file.exists()) {
+        picture(file, bounds, isSvg)
+    }
+
+    val url = runCatching { URI.create(image).toURL() }
+    if (url.isSuccess) {
+        picture(url.getOrThrow(), bounds, isSvg)
+    }
+
+    throw IllegalArgumentException("Can't load image from $image")
 }
