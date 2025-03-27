@@ -210,6 +210,7 @@ object HappyWheels  {
         }
     }
 
+    // TODO: use this 
     const val minVisibleAlpha = 2.55
 
     const val minVisibleArea = 2.0
