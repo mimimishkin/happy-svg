@@ -249,7 +249,7 @@ internal class HappyLayerImpl(
             this.clip == null && clip == null -> null
             this.clip == null -> clip
             clip == null -> this.clip
-            else -> this.clip intersect clip
+            else -> this.clip and clip
         }
 
         val builder = HappyLayerImpl(

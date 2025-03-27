@@ -53,7 +53,7 @@ internal class HappyGraphics(val destination: HappyLayer) : AbstractGraphics2D()
         val path = shape
             .toPath()
             .transformWith(matrixTransform)
-            .let { pathClip?.intersect(it) ?: it }
+            .let { pathClip?.and(it) ?: it }
 
         if (path.isNotEmpty()) {
             destination.art(path, happyPaint ?: foreground.toHappyPaint(path.bounds))
