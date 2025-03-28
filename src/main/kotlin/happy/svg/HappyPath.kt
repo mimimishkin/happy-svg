@@ -115,12 +115,10 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
         nodes.apply { removeLast() }
     }
 
-    override val content: String
-        get() = nodes.withIndex().joinToString(separator = " ") { (i, v) -> v.format(i) }
-
     override fun HappyWheels.Config.configure() {
         strokeOnly = this@HappyPath.strokeOnly
         pathId = id
         nodesCount = nodes.size
+        thisContent = nodes.withIndex().joinToString(separator = " ") { (i, v) -> v.format(i) }
     }
 }

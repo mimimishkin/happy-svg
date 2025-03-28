@@ -28,11 +28,10 @@ data class HappyShape(
 ) : HappyWheels.Format {
     override val tag = "sh"
 
-    override val content: String
-        get() = path?.format().orEmpty()
-
     override fun HappyWheels.Config.configure() {
         checkValid()
+
+        thisContent = path?.format().orEmpty()
 
         type = this@HappyShape.type
         shapeBounds = when (type) {

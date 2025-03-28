@@ -9,30 +9,28 @@ object HappyWheels  {
     interface Format {
         val tag: String
 
-        val content: String
-            get() = ""
-
         fun Config.configure() = Unit
 
         fun format(): String {
-            val (contents, params) = Config().apply { configure() }.let { it.childContents to it.namedParams }
+            with(Config().apply { configure() }) {
+                val inlineContent = childContents.isEmpty() && !thisContent.contains('<')
+                val builder = StringBuilder()
+                return if (inlineContent) {
+                    builder.append("<$tag ")
+                    namedParams.forEach { (key, value) -> builder.append("$key=\"$value\" ") }
+                    builder.deleteAt(builder.lastIndex)
+                    builder.append(thisContent)
+                    builder.append("/>")
+                    builder.toString()
+                } else {
+                    builder.append("<$tag> ")
+                    namedParams.forEach { (key, value) -> builder.append("$key=\"$value\" ") }
+                    builder.append("\b\n")
+                    childContents.forEach { builder.append("    $it\n") }
+                    builder.append("</$tag>")
+                    builder.toString()
+                }
 
-            val inlineContent = contents.isEmpty() && !content.contains('<')
-            val builder = StringBuilder()
-            return if (inlineContent) {
-                builder.append("<$tag ")
-                params.forEach { (key, value) -> builder.append("$key=\"$value\" ") }
-                builder.deleteAt(builder.lastIndex)
-                builder.append(content)
-                builder.append("/>")
-                builder.toString()
-            } else {
-                builder.append("<$tag> ")
-                params.forEach { (key, value) -> builder.append("$key=\"$value\" ") }
-                builder.append("\b\n")
-                contents.forEach { builder.append("    $it\n") }
-                builder.append("</$tag>")
-                builder.toString()
             }
         }
     }
@@ -129,6 +127,7 @@ object HappyWheels  {
         var nodesCount: Int? = null
         val unknown: MutableMap<String, String> = mutableMapOf()
 
+        var thisContent: String = ""
         var childContents: List<String> = emptyList()
 
         val namedParams: Map<String, String> get() {
