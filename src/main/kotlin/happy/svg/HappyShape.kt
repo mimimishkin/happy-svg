@@ -2,14 +2,14 @@ package happy.svg
 
 import happy.svg.HappyWheels.Collision
 import happy.svg.HappyWheels.ShapeType
-import happy.svg.HappyWheels.ShapeType.Circle
-import happy.svg.HappyWheels.ShapeType.Polygon
-import happy.svg.HappyWheels.ShapeType.Triangle
+import happy.svg.HappyWheels.ShapeType.*
 import happy.svg.HappyWheels.decimal
 import path.utils.math.near
 import path.utils.paths.Bounds
 import java.awt.Color
+import kotlin.math.cos
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 // TODO: rearrange params like at the game
 data class HappyShape(
@@ -35,8 +35,15 @@ data class HappyShape(
         checkValid()
 
         type = this@HappyShape.type
-        shapeBounds = if (type != Triangle) bounds else {
-            bounds.copy().apply { top += (1.0 / 6.0) * h } // happy wheels render triangles with this offset ¯\(0_o)/¯
+        shapeBounds = when (type) {
+            Art, Polygon -> path!!.bounds
+            Triangle -> bounds!!.copy().apply {
+                // happy wheels render triangles with this offset ¯\(0_o)/¯
+                val r = Math.toRadians(rotation.toDouble())
+                y += (1.0 / 6.0) * h * cos(r)
+                x -= (1.0 / 6.0) * h * sin(r)
+            }
+            else -> bounds!!
         }
         shapeRotation = rotation
         shapeColor = color.decimal
@@ -78,7 +85,7 @@ fun HappyRectangle(
     density: Float = 1f,
     collision: Collision = Collision.Everything
 ) = HappyShape(
-    type = ShapeType.Rectangle,
+    type = Rectangle,
     path = null,
     bounds = bounds,
     color = color,
@@ -170,7 +177,7 @@ fun HappyArt(
     outline: Color? = null,
     bounds: Bounds = path.bounds,
 ) = HappyShape(
-    type = ShapeType.Art,
+    type = Art,
     path = path,
     bounds = bounds,
     color = color,
