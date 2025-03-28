@@ -14,8 +14,8 @@ import kotlin.math.sin
 // TODO: rearrange params like at the game
 data class HappyShape(
     var type: ShapeType,
-    var path: HappyPath?, // TODO: why do we need `val`?
-    var bounds: Bounds,
+    var path: HappyPath?,
+    var bounds: Bounds?,
     var rotation: Int = 0,
     var color: Color,
     var outline: Color? = null,
@@ -62,14 +62,18 @@ data class HappyShape(
     }
 
     fun checkValid() {
-        if (path == null) {
+        if (type == Polygon || type == Art) {
+            check(path != null) { "Path is null" }
+            check(bounds == null) { "Bounds for custom shape are not supported. Transform path instead" }
             check(rotation == 0) { "Rotating a custom shape is not supported. Transform path instead" }
+        } else {
+            check(bounds != null) { "Bounds are null" }
         }
 
         check(density in 0.1..100.0) { "Density must be between 0.1 and 100" }
 
         if (type == Circle) {
-            check(bounds.w near bounds.h) { "Can't draw ellipse, only circles" }
+            check(bounds!!.w near bounds!!.h) { "Can't draw ellipse, only circles" }
         }
     }
 }
@@ -152,7 +156,6 @@ fun HappyTriangle(
 // TODO: 2. check for max node count - 10
 fun HappyPolygon(
     path: HappyPath,
-    bounds: Bounds = path.bounds,
     color: Color,
     outline: Color? = null,
     isFixed: Boolean = false,
@@ -162,7 +165,7 @@ fun HappyPolygon(
 ) = HappyShape(
     type = Polygon,
     path = path,
-    bounds = bounds,
+    bounds = null,
     color = color,
     outline = outline,
     isFixed = isFixed,
@@ -175,11 +178,10 @@ fun HappyArt(
     path: HappyPath,
     color: Color,
     outline: Color? = null,
-    bounds: Bounds = path.bounds,
 ) = HappyShape(
     type = Art,
     path = path,
-    bounds = bounds,
+    bounds = null,
     color = color,
     outline = outline,
 )
