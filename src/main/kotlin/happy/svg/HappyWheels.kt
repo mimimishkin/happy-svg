@@ -3,6 +3,7 @@ package happy.svg
 import path.utils.math.Vec2
 import path.utils.paths.Bounds
 import java.awt.Color
+import java.util.Locale
 import kotlin.ranges.contains
 
 object HappyWheels  {
@@ -255,8 +256,8 @@ object HappyWheels  {
 
     const val minVisibleArea = 2.0
 
-    val Float.scaled get() = "%.3f".format(this)
-    val Double.scaled get() = "%.3f".format(this)
+    val Float.scaled get() = String.format(Locale.US, "%.3f", this)
+    val Double.scaled get() = String.format(Locale.US, "%.3f", this)
 
     val Boolean.symbol get() = if (this) "t" else "f"
 
