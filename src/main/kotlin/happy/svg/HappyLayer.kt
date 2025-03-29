@@ -346,8 +346,8 @@ internal class HappyLayerImpl(
 
         if (ignoreLayer) {
             val happyPath = path?.let { HappyPath(it) }
-            val bounds = requireNotNull(happyPath?.bounds ?: bounds) { "Bounds are null" }
-            if (bounds.area < HappyWheels.minVisibleArea) {
+            val area = requireNotNull(happyPath?.bounds ?: bounds) { "Bounds are null" }.area
+            if (area < HappyWheels.minVisibleArea) {
                 return
             }
 
