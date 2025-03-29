@@ -500,7 +500,7 @@ internal class HappyLayerImpl(
         preferences: HappyPreferences?,
         block: HappyLayer.() -> Unit
     ) {
-        val fullTransform = if (transform != null) this.transform.post(transform) else this.transform
+        val fullTransform = transform?.pre(this.transform) ?: this.transform
         val fullClip = when {
             this.clip == null && clip == null -> null
             this.clip == null -> clip
