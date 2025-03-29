@@ -2,9 +2,11 @@ package happy.svg
 
 import happy.svg.HappyWheels.scaled
 import path.utils.math.Vec2
+import path.utils.math.distToSq
 import path.utils.math.orZero
 import path.utils.paths.*
 import path.utils.paths.Command.*
+import kotlin.math.abs
 
 class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Format {
     companion object {
@@ -46,15 +48,18 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
 
         fun makePoint(to: Vec2) {
             val last = nodes.lastOrNull()
-            if (last == null || !(last.point near to))
+            if (last == null) {
                 nodes += HappyV(to)
+            } else {
+                if (abs(last.point distToSq to) > 0.005)
+                    nodes += HappyV(to)
+            }
         }
+
         fun close() {
             if (!wasClosed) {
                 makePoint(lastMove!!)
-
-                if (firstMove != null)
-                    makePoint(firstMove!!)
+                makePoint(firstMove!!)
             }
             wasClosed = true
         }
@@ -65,9 +70,7 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
             path.scale(20 / bounds.area, anchor = bounds.center)
         }
 
-        validPath.minify().validate().simplify().iteratePathFull { command, _, _, moveTo ->
-            lastMove = moveTo
-
+        for (command in validPath.minify().validate().simplify()) {
             when (command) {
                 is MoveTo -> {
                     if (firstMove == null) {
@@ -77,7 +80,8 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
                         wasClosed = false
                     }
 
-                    makePoint(lastMove ?: command.p)
+                    lastMove = command.p
+                    makePoint(lastMove)
                 }
 
                 is LineTo -> makePoint(command.p)
@@ -103,10 +107,17 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
             }
         }
 
-        // as a path may have several MoveTo commands, ensure a path is closed
         close()
-        // remove the last point that matches to the first
-        nodes.apply { removeLast() }
+        nodes.last().run {
+            if (point near firstMove!! && (leftAnchor ?: point) near point)
+                nodes.removeLast()
+        }
+        nodes.first().run {
+            if (point near nodes.last().point && (rightAnchor ?: point) near point)
+                nodes.removeFirst()
+        }
+
+        nodes
     }
 
     override fun HappyWheels.Config.configure() {
