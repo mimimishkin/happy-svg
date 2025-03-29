@@ -340,6 +340,9 @@ internal class HappyLayerImpl(
         innerCutout: Float,
         ignoreLayer: Boolean,
     ) {
+        if (max(color.alpha, outline?.alpha ?: 0) < HappyWheels.minVisibleAlpha) {
+            return
+        }
         if (path != null && path.size <= 2) {
             return
         }
