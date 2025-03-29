@@ -18,21 +18,21 @@ object HappyWheels  {
                 for ((key, value) in namedParams) {
                     append("$key=\"$value\" ")
                 }
-                deleteAt(lastIndex)
 
                 if (thisContent.isNotEmpty()) {
                     append(thisContent)
+                    append(' ')
                 }
 
                 if (children.isNotEmpty()) {
-                    append(">\n")
+                    append("\b>\n")
                     for (child in children) {
                         val child = child.format().replace("\n", "\n    ")
                         append("    $child\n")
                     }
                     append("</$tag>")
                 } else {
-                    append("/>")
+                    append("\b/>")
                 }
             }
         }
