@@ -3,7 +3,6 @@ package happy.svg
 import path.utils.math.Vec2
 import path.utils.paths.Bounds
 import java.awt.Color
-import java.io.File
 
 object HappyWheels  {
     interface Format {
@@ -13,7 +12,7 @@ object HappyWheels  {
 
         fun format(): String {
             with(Config().apply { configure() }) {
-                val inlineContent = childContents.isEmpty() && !thisContent.contains('<')
+                val inlineContent = children.isEmpty() && !thisContent.contains('<')
                 val builder = StringBuilder()
                 return if (inlineContent) {
                     builder.append("<$tag ")
@@ -26,7 +25,7 @@ object HappyWheels  {
                     builder.append("<$tag> ")
                     namedParams.forEach { (key, value) -> builder.append("$key=\"$value\" ") }
                     builder.append("\b\n")
-                    childContents.forEach { builder.append("    $it\n") }
+                    children.forEach { builder.append("    ${it.format()}\n") }
                     builder.append("</$tag>")
                     builder.toString()
                 }
@@ -115,6 +114,14 @@ object HappyWheels  {
         var shapeOpacity: Int? = null
         var shapeCollision: Collision? = null
         var shapeInnerCutout: Float? = null
+        var groupCenter: Vec2? = null
+        var groupRotation: Int? = null
+        var groupCenterOffset: Vec2? = null
+        var groupIsForeground: Boolean? = null
+        var groupOpacity: Int? = null
+        var groupSleeping: Boolean? = null
+        var groupIsFixed: Boolean? = null
+        var groupIsFixedAngle: Boolean? = null
         var version: String? = null
         var characterPosition: Vec2? = null
         var character: Character? = null
@@ -128,7 +135,7 @@ object HappyWheels  {
         val unknown: MutableMap<String, String> = mutableMapOf()
 
         var thisContent: String = ""
-        var childContents: List<String> = emptyList()
+        var children: List<Format> = emptyList()
 
         val namedParams: Map<String, String> get() {
             val params = mutableMapOf<String, String>()
@@ -137,7 +144,7 @@ object HappyWheels  {
                 params += "t" to type!!.number.toString()
             }
             if (shapeInteractive != null) {
-                params += "i" to if (shapeInteractive!!) "t" else "f"
+                params += "i" to shapeInteractive!!.symbol
             }
             if (shapeBounds != null) {
                 params += "p0" to shapeBounds!!.cx.scaled.toString()
@@ -149,10 +156,10 @@ object HappyWheels  {
                 params += "p4" to shapeRotation.toString()
             }
             if (shapeFixed != null) {
-                params += "p5" to if (shapeFixed!!) "t" else "f"
+                params += "p5" to shapeFixed!!.symbol
             }
             if (shapeSleeping != null) {
-                params += "p6" to if (shapeSleeping!!) "t" else "f"
+                params += "p6" to shapeSleeping!!.symbol
             }
             if (shapeDensity != null) {
                 params += "p7" to shapeDensity.toString()
@@ -172,30 +179,56 @@ object HappyWheels  {
             if (shapeInnerCutout != null) {
                 params += "p12" to shapeInnerCutout!!.toString()
             }
+            if (groupCenter != null) {
+                params += "x" to groupCenter!!.x.scaled.toString()
+                params += "y" to groupCenter!!.y.scaled.toString()
+            }
+            if (groupRotation != null) {
+                params += "r" to groupRotation!!.toString()
+            }
+            if (groupCenterOffset != null) {
+                params += "ox" to groupCenterOffset!!.x.scaled.toString()
+                params += "oy" to groupCenterOffset!!.y.scaled.toString()
+            }
+            if (groupIsForeground != null) {
+                params += "f" to groupIsForeground!!.toString()
+            }
+            if (groupOpacity != null) {
+                params += "o" to groupOpacity!!.toString()
+            }
+            if (groupSleeping != null) {
+                params += "s" to groupSleeping!!.symbol
+            }
+            if (groupIsFixed != null) {
+                params += "im" to groupIsFixed!!.symbol
+            }
+            if (groupIsFixedAngle != null) {
+                params += "fr" to  groupIsFixedAngle!!.symbol
+            }
             if (version != null) {
                 params += "v" to version!!
             }
             if (characterPosition != null) {
-                params += "x" to characterPosition!!.x.toString()
-                params += "y" to characterPosition!!.y.toString()
+                params += "x" to characterPosition!!.x.scaled.toString()
+                params += "y" to characterPosition!!.y.scaled.toString()
             }
             if (character != null) {
                 params += "c" to character!!.number.toString()
             }
             if (forceCharacter != null) {
-                params += "f" to if (forceCharacter!!) "t" else "f"
+                params += "f" to forceCharacter!!.symbol
             }
             if (hideVehicle != null) {
-                params += "h" to if (hideVehicle!!) "t" else "f"
+                params += "h" to hideVehicle!!.symbol
             }
             if (backgroundType != null) {
                 params += "bg" to backgroundType!!.number.toString()
             }
             if (backgroundColor != null) {
-                params += "bgc" to backgroundColor.toString()
+                params += "bgc" to backgroundColor!!.toString()
             }
             if (strokeOnly != null) {
-                params += "f" to if (strokeOnly!!) "f" else "t"
+                params += "f" to (!strokeOnly!!).symbol
             }
             if (pathId != null) {
                 params += "id" to pathId.toString()
@@ -215,6 +248,8 @@ object HappyWheels  {
     const val minVisibleArea = 2.0
 
     val Double.scaled get() = "%.3f".format(this)
+
+    val Boolean.symbol get() = if (this) "t" else "f"
 
     val Color.decimal get() = red * 256 * 256 + green * 256 + blue
 
