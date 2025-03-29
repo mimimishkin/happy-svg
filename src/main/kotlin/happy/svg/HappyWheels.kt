@@ -26,7 +26,10 @@ object HappyWheels  {
                     builder.append("<$tag> ")
                     namedParams.forEach { (key, value) -> builder.append("$key=\"$value\" ") }
                     builder.append("\b\n")
-                    children.forEach { builder.append("    ${it.format()}\n") }
+                    children.forEach {
+                        val child = it.format().replace("\n", "\n    ")
+                        builder.append("    $child\n")
+                    }
                     builder.append("</$tag>")
                     builder.toString()
                 }
