@@ -12,29 +12,28 @@ object HappyWheels  {
 
         fun Config.configure()
 
-        fun format(): String {
-            with(Config().apply { configure() }) {
-                val inlineContent = children.isEmpty() && !thisContent.contains('<')
-                val builder = StringBuilder()
-                return if (inlineContent) {
-                    builder.append("<$tag ")
-                    namedParams.forEach { (key, value) -> builder.append("$key=\"$value\" ") }
-                    builder.deleteAt(builder.lastIndex)
-                    builder.append(thisContent)
-                    builder.append("/>")
-                    builder.toString()
-                } else {
-                    builder.append("<$tag> ")
-                    namedParams.forEach { (key, value) -> builder.append("$key=\"$value\" ") }
-                    builder.append("\b\n")
-                    children.forEach {
-                        val child = it.format().replace("\n", "\n    ")
-                        builder.append("    $child\n")
-                    }
-                    builder.append("</$tag>")
-                    builder.toString()
+        fun format(): String = with(Config().apply { configure() }) {
+            buildString {
+                append("<$tag ")
+                for ((key, value) in namedParams) {
+                    append("$key=\"$value\" ")
+                }
+                deleteAt(lastIndex)
+
+                if (thisContent.isNotEmpty()) {
+                    append(thisContent)
                 }
 
+                if (children.isNotEmpty()) {
+                    append(">\n")
+                    for (child in children) {
+                        val child = child.format().replace("\n", "\n    ")
+                        append("    $child\n")
+                    }
+                    append("</$tag>")
+                } else {
+                    append("/>")
+                }
             }
         }
     }
