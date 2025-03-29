@@ -11,7 +11,6 @@ import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
-// TODO: rearrange params like at the game
 data class HappyShape(
     var type: ShapeType,
     var path: HappyPath?,
