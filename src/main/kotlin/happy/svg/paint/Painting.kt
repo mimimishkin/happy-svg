@@ -18,9 +18,9 @@ import java.awt.Color
 import java.awt.TexturePaint
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.InputStream
 import java.io.Reader
 import java.net.URI
-import java.net.URL
 import java.util.*
 import javax.imageio.ImageIO
 import kotlin.math.PI
@@ -199,17 +199,16 @@ fun HappyLayer.picture(
 }
 
 fun HappyLayer.picture(
-    image: URL,
+    image: InputStream,
     viewport: Bounds? = null,
     aspectRatio: AspectRatio = AspectRatio.None,
     ignoreLayer: Boolean = false,
     isSvg: Boolean
 ) {
-    val inputStream = image.openStream()
     if (isSvg) {
-        picture(SVGDiagram(inputStream.reader()), viewport, aspectRatio, ignoreLayer)
+        picture(SVGDiagram(image.bufferedReader()), viewport, aspectRatio, ignoreLayer)
     } else {
-        picture(ImageIO.read(inputStream), viewport, aspectRatio, ignoreLayer)
+        picture(ImageIO.read(image.buffered()), viewport, aspectRatio, ignoreLayer)
     }
 }
 
@@ -227,7 +226,7 @@ fun HappyLayer.picture(
 
     val url = runCatching { URI.create(image).toURL() }
     if (url.isSuccess) {
-        return picture(url.getOrThrow(), viewport, aspectRatio, ignoreLayer, isSvg)
+        return picture(url.getOrThrow().openStream(), viewport, aspectRatio, ignoreLayer, isSvg)
     }
 
     throw IllegalArgumentException("Can't load image from $image")
