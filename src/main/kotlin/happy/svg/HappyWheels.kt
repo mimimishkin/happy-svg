@@ -9,7 +9,7 @@ object HappyWheels  {
     interface Format {
         val tag: String
 
-        fun Config.configure() = Unit
+        fun Config.configure()
 
         fun format(): String {
             with(Config().apply { configure() }) {
