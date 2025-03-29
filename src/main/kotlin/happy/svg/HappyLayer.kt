@@ -1,13 +1,22 @@
 package happy.svg
 
 import happy.svg.HappyWheels.Collision
+import happy.svg.HappyWheels.Collision.Everything
+import happy.svg.HappyWheels.ShapeType
 import happy.svg.HappyWheels.ShapeType.*
 import happy.svg.convert.HappyPreferences
 import path.utils.math.MatrixTransform
 import path.utils.math.Transforms
 import path.utils.math.Vec2
+import path.utils.math.near
 import path.utils.paths.*
 import java.awt.Color
+import kotlin.math.PI
+import kotlin.math.acos
+import kotlin.math.atan2
+import kotlin.math.hypot
+import kotlin.math.roundToInt
+import kotlin.math.sin
 
 @DslMarker
 annotation class HappyLayerDsl
@@ -34,107 +43,21 @@ interface HappyLayer {
      *
      * Shapes of types [Rectangle], [Circle], [Triangle] will be converted to [Polygon] or [Art] when need
      */
-    fun shape(shape: HappyShape)
-
-    fun rectangle(
-        bounds: Bounds,
-        color: Color = this.color,
-        outline: Color? = this.outline,
-        rotation: Int = this.rotation,
-        isInteractive: Boolean = this.isInteractive,
-        isFixed: Boolean = this.isFixed,
-        isSleeping: Boolean = this.isSleeping,
-        density: Float = this.density,
-        collision: Collision = this.collision
-    ) = shape(HappyRectangle(
-        bounds = bounds,
-        color = color,
-        outline = outline,
-        rotation = rotation,
-        isInteractive = isInteractive,
-        isFixed = isFixed,
-        isSleeping = isSleeping,
-        density = density,
-        collision = collision
-    ))
-
-    fun circle(
-        bounds: Bounds,
-        color: Color = this.color,
-        outline: Color? = this.outline,
-        rotation: Int = this.rotation,
-        isInteractive: Boolean = this.isInteractive,
-        isFixed: Boolean = this.isFixed,
-        isSleeping: Boolean = this.isSleeping,
-        density: Float = this.density,
-        collision: Collision = this.collision,
-        innerCutout: Float = this.innerCutout
-    ) = shape(HappyCircle(
-        bounds = bounds,
-        color = color,
-        outline = outline,
-        rotation = rotation,
-        isInteractive = isInteractive,
-        isFixed = isFixed,
-        isSleeping = isSleeping,
-        density = density,
-        collision = collision,
-        innerCutout = innerCutout
-    ))
-
-    fun triangle(
-        bounds: Bounds,
-        color: Color = this.color,
-        outline: Color? = this.outline,
-        rotation: Int = this.rotation,
-        isInteractive: Boolean = this.isInteractive,
-        isFixed: Boolean = this.isFixed,
-        isSleeping: Boolean = this.isSleeping,
-        density: Float = this.density,
-        collision: Collision = this.collision
-    ) = shape(HappyTriangle(
-        bounds = bounds,
-        color = color,
-        outline = outline,
-        rotation = rotation,
-        isInteractive = isInteractive,
-        isFixed = isFixed,
-        isSleeping = isSleeping,
-        density = density,
-        collision = collision
-    ))
-
-    fun polygon(
-        path: Path,
-        color: Color = this.color,
-        outline: Color? = this.outline,
-        isFixed: Boolean = this.isFixed,
-        isSleeping: Boolean = this.isSleeping,
-        density: Float = this.density,
-        collision: Collision = this.collision,
-        bounds: Bounds = path.bounds
-    ) = shape(HappyPolygon(
-        path = HappyPath(path),
-        color = color,
-        outline = outline,
-        isFixed = isFixed,
-        isSleeping = isSleeping,
-        density = density,
-        collision = collision,
-        bounds = bounds,
-    ))
-
-    fun art(
-        path: Path,
-        color: Color = this.color,
-        outline: Color? = this.outline,
-        bounds: Bounds = path.bounds,
-    ) = shape(HappyArt(
-        path = HappyPath(path),
-        bounds = bounds,
-        color = color,
-        outline = outline,
-    ))
+    fun shape(
+        type: ShapeType,
+        path: Path?,
+        bounds: Bounds?,
+        color: Color  = this.color,
+        outline: Color?  = this.outline,
+        rotation: Int  = this.rotation,
+        isInteractive: Boolean  = this.isInteractive,
+        isFixed: Boolean  = this.isFixed,
+        isSleeping: Boolean  = this.isSleeping,
+        density: Float  = this.density,
+        collision: Collision  = this.collision,
+        innerCutout: Float = this.innerCutout,
+        ignoreLayer: Boolean = false,
+    )
 
     fun layer(
         color: Color = this.color,
@@ -153,57 +76,227 @@ interface HappyLayer {
 
         block: HappyLayer.() -> Unit
     )
+}
 
-    fun transform(
-        transform: MatrixTransform? = null,
-        block: HappyLayer.() -> Unit
-    ) = layer(
-        transform = transform,
-        block = block
-    )
+fun HappyLayer.rectangle(
+    bounds: Bounds,
+    color: Color = this.color,
+    outline: Color? = this.outline,
+    rotation: Int = this.rotation,
+    isInteractive: Boolean = this.isInteractive,
+    isFixed: Boolean = this.isFixed,
+    isSleeping: Boolean = this.isSleeping,
+    density: Float = this.density,
+    collision: Collision = this.collision,
+    ignoreLayer: Boolean = false,
+) = shape(
+    type = Rectangle,
+    path = null,
+    bounds = bounds,
+    color = color,
+    outline = outline,
+    rotation = rotation,
+    isInteractive = isInteractive,
+    isFixed = isFixed,
+    isSleeping = isSleeping,
+    density = density,
+    collision = collision,
+    innerCutout = 0f,
+    ignoreLayer = ignoreLayer,
+)
 
-    fun rotate(
-        theta: Double,
-        center: Vec2 = Vec2(),
-        block: HappyLayer.() -> Unit
-    ) = transform(
-        transform = Transforms.rotate(theta, center.x, center.y),
-        block = block
-    )
+fun HappyLayer.circle(
+    bounds: Bounds,
+    color: Color = this.color,
+    outline: Color? = this.outline,
+    rotation: Int = this.rotation,
+    isInteractive: Boolean = this.isInteractive,
+    isFixed: Boolean = this.isFixed,
+    isSleeping: Boolean = this.isSleeping,
+    density: Float = this.density,
+    collision: Collision = this.collision,
+    innerCutout: Float = this.innerCutout,
+    ignoreLayer: Boolean = false,
+) = shape(
+    type = Circle,
+    path = null,
+    bounds = bounds,
+    color = color,
+    outline = outline,
+    rotation = rotation,
+    isInteractive = isInteractive,
+    isFixed = isFixed,
+    isSleeping = isSleeping,
+    density = density,
+    collision = collision,
+    innerCutout = innerCutout,
+    ignoreLayer = ignoreLayer,
+)
 
-    fun translate(
-        x: Double,
-        y: Double,
-        block: HappyLayer.() -> Unit
-    ) = transform(
-        transform = Transforms.translate(x, y),
-        block = block
-    )
+fun HappyLayer.triangle(
+    bounds: Bounds,
+    color: Color = this.color,
+    outline: Color? = this.outline,
+    rotation: Int = this.rotation,
+    isInteractive: Boolean = this.isInteractive,
+    isFixed: Boolean = this.isFixed,
+    isSleeping: Boolean = this.isSleeping,
+    density: Float = this.density,
+    collision: Collision = this.collision,
+    ignoreLayer: Boolean = false,
+) = shape(
+    type = Triangle,
+    path = null,
+    bounds = bounds,
+    color = color,
+    outline = outline,
+    rotation = rotation,
+    isInteractive = isInteractive,
+    isFixed = isFixed,
+    isSleeping = isSleeping,
+    density = density,
+    collision = collision,
+    innerCutout = 0f,
+    ignoreLayer = ignoreLayer,
+)
 
-    fun scale(
-        x: Double,
-        y: Double = x,
-        block: HappyLayer.() -> Unit
-    ) = transform(
-        transform = Transforms.scale(x, y),
-        block = block
-    )
+fun HappyLayer.polygon(
+    path: Path,
+    color: Color = this.color,
+    outline: Color? = this.outline,
+    isFixed: Boolean = this.isFixed,
+    isSleeping: Boolean = this.isSleeping,
+    density: Float = this.density,
+    collision: Collision = this.collision,
+    ignoreLayer: Boolean = false,
+) = shape(
+    type = Polygon,
+    path = path,
+    bounds = null,
+    color = color,
+    outline = outline,
+    rotation = 0,
+    isFixed = isFixed,
+    isSleeping = isSleeping,
+    density = density,
+    collision = collision,
+    innerCutout = 0f,
+    ignoreLayer = ignoreLayer,
+)
 
-    fun clip(
-        path: Path,
-        block: HappyLayer.() -> Unit
-    ) = layer(
-        clip = path,
-        block = block
-    )
+fun HappyLayer.art(
+    path: Path,
+    color: Color = this.color,
+    outline: Color? = this.outline,
+    ignoreLayer: Boolean = false,
+) = shape(
+    type = Art,
+    path = path,
+    bounds = null,
+    color = color,
+    outline = outline,
+    rotation = 0,
+    isFixed = false,
+    isSleeping = false,
+    density = 1f,
+    collision = Everything,
+    innerCutout = 0f,
+    ignoreLayer = ignoreLayer,
+)
 
-    fun clip(
-        bounds: Bounds,
-        block: HappyLayer.() -> Unit
-    ) = clip(
-        path = rect(bounds),
-        block = block
-    )
+/**
+ * Arts can't be interactive, while this is the only possible state for polygons.
+ *
+ * This method uniforms their creation
+ */
+fun HappyLayer.possiblyInteractiveShape(
+    path: Path,
+    color: Color = this.color,
+    outline: Color? = this.outline,
+    isInteractive: Boolean = this.isInteractive,
+    isFixed: Boolean = this.isFixed,
+    isSleeping: Boolean = this.isSleeping,
+    density: Float = this.density,
+    collision: Collision = this.collision,
+    ignoreLayer: Boolean = false,
+) {
+    if (isInteractive) {
+        polygon(path, color, outline, isFixed, isSleeping, density, collision, ignoreLayer)
+    } else {
+        art(path, color, outline, ignoreLayer)
+    }
+}
+
+fun HappyLayer.transform(
+    transform: MatrixTransform? = null,
+    block: HappyLayer.() -> Unit
+) = layer(
+    transform = transform,
+    block = block
+)
+
+fun HappyLayer.rotate(
+    theta: Double,
+    center: Vec2 = Vec2(),
+    block: HappyLayer.() -> Unit
+) = transform(
+    transform = Transforms.rotate(theta, center.x, center.y),
+    block = block
+)
+
+fun HappyLayer.translate(
+    x: Double,
+    y: Double,
+    block: HappyLayer.() -> Unit
+) = transform(
+    transform = Transforms.translate(x, y),
+    block = block
+)
+
+fun HappyLayer.scale(
+    x: Double,
+    y: Double = x,
+    block: HappyLayer.() -> Unit
+) = transform(
+    transform = Transforms.scale(x, y),
+    block = block
+)
+
+fun HappyLayer.clip(
+    path: Path,
+    block: HappyLayer.() -> Unit
+) = layer(
+    clip = path,
+    block = block
+)
+
+fun HappyLayer.clip(
+    bounds: Bounds,
+    block: HappyLayer.() -> Unit
+) = clip(
+    path = rect(bounds),
+    block = block
+)
+
+// ------------------
+// ------ IMPL ------
+// ------------------
+
+fun main() {
+    val matrix = Transforms.rotate(/*2.0, */3.0, 10.0, 12.0)
+
+
+
+    val isReflection = (matrix.m00 * matrix.m11 - matrix.m01 * matrix.m10) < 0
+    val x = sin(acos(matrix.m00)) near matrix.m10
+
+    /*val rotation = if (scaleX >= 0 && scaleY >= 0) {
+        atan2(c, a)
+    } else {
+        TODO()
+    }*/
+
+
 }
 
 internal class HappyLayerImpl(
@@ -216,17 +309,180 @@ internal class HappyLayerImpl(
     override val isFixed: Boolean = true,
     override val isSleeping: Boolean = false,
     override val density: Float = 1f,
-    override val collision: Collision = Collision.Everything,
+    override val collision: Collision = Everything,
     override val innerCutout: Float = 0f,
 
     override val transform: MatrixTransform = Transforms.identical(),
     override val clip: Path? = null,
     override val preferences: HappyPreferences
 ) : HappyLayer {
+    val clipBounds by lazy { clip?.bounds }
 
-    override fun shape(shape: HappyShape) {
-        // TODO: apply clip and transform
-        destination.shapes += shape
+    // TODO: api to work with groups
+    override fun shape(
+        type: ShapeType,
+        path: Path?,
+        bounds: Bounds?,
+        color: Color,
+        outline: Color?,
+        rotation: Int,
+        isInteractive: Boolean,
+        isFixed: Boolean,
+        isSleeping: Boolean,
+        density: Float,
+        collision: Collision,
+        innerCutout: Float,
+        ignoreLayer: Boolean,
+    ) {
+        if (ignoreLayer) {
+            destination.shapes += HappyShape(
+                type = type,
+                path = path?.let { HappyPath(it) },
+                bounds = bounds,
+                color = color,
+                outline = outline,
+                rotation = rotation,
+                isInteractive = isInteractive,
+                isFixed = isFixed,
+                isSleeping = isSleeping,
+                density = density,
+                collision = collision,
+                innerCutout = innerCutout
+            )
+        } else {
+            fun Path?.transformed(transform: MatrixTransform = this@HappyLayerImpl.transform) =
+                requireNotNull(this) { "Path is null" }.transformWith(transform).let { clip?.and(it) ?: it }
+
+            // assume a transform is affine
+            fun MatrixTransform.isScaleAndTranslate(): Boolean =
+                m01 near 0.0 && m10 near 0.0
+            fun MatrixTransform.isRotateAndTranslate(): Boolean =
+                sin(acos(m00)) near m10
+
+            when (type) {
+                Polygon -> polygon(
+                    path = path.transformed(),
+                    color = color,
+                    outline = outline,
+                    isFixed = isFixed,
+                    isSleeping = isSleeping,
+                    density = density,
+                    collision = collision,
+                    ignoreLayer = true
+                )
+
+                Art -> art(
+                    path = path.transformed(),
+                    color = color,
+                    outline = outline,
+                    ignoreLayer = true
+                )
+
+                else -> {
+                    val bounds = requireNotNull(bounds) { "Bounds is null" }
+                    val transform = if (rotation != 0) {
+                        transform.rotate(Math.toDegrees(rotation.toDouble()), bounds.cx, bounds.cy)
+                    } else {
+                        transform
+                    }
+
+                    if (transform.isScaleAndTranslate()) {
+                        val bounds = Bounds(
+                            bounds.x + transform.m02,
+                            bounds.y + transform.m12,
+                            bounds.w * hypot(transform.m00, transform.m10),
+                            bounds.h * hypot(transform.m01, transform.m11)
+                        )
+
+                        if (clipBounds?.overlap(bounds) == false) {
+                            return shape(
+                                type = type,
+                                path = null,
+                                bounds = bounds,
+                                color = color,
+                                outline = outline,
+                                rotation = rotation,
+                                isInteractive = isInteractive,
+                                isFixed = isFixed,
+                                isSleeping = isSleeping,
+                                density = density,
+                                collision = collision,
+                                ignoreLayer = true,
+                            )
+                        }
+                    }
+
+                    if (transform.isRotateAndTranslate()) {
+                        val bounds = Bounds(
+                            x = bounds.x + transform.m02,
+                            y = bounds.y + transform.m12,
+                            w = bounds.w,
+                            h = bounds.h
+                        )
+
+                        if (clipBounds?.overlap(bounds) == false) {
+                            val rotation = transform.transform(bounds.center).angle(Vec2()).roundToInt()
+                            return shape(
+                                type = type,
+                                path = null,
+                                bounds = bounds,
+                                color = color,
+                                outline = outline,
+                                rotation = rotation,
+                                isInteractive = isInteractive,
+                                isFixed = isFixed,
+                                isSleeping = isSleeping,
+                                density = density,
+                                collision = collision,
+                                ignoreLayer = true,
+                            )
+                        }
+                    }
+
+                    fun Path.draw() = possiblyInteractiveShape(
+                        path = path.transformed(),
+                        color = color,
+                        outline = outline,
+                        isFixed = isFixed,
+                        isSleeping = isSleeping,
+                        density = density,
+                        collision = collision,
+                        ignoreLayer = true
+                    )
+
+                    when (type) {
+                        Rectangle -> rect(bounds).draw()
+
+                        Circle -> {
+                            require(bounds.w near bounds.h) { "Can't draw ellipse, only circles" }
+
+                            val radius = bounds.w / 2
+                            if (innerCutout == 0f) {
+                                circle(bounds.cx, bounds.cy, radius).draw()
+                            } else {
+                                val rightScale = innerCutout / 100 * (1 - 0.015)
+                                val outRadius = rightScale * radius
+
+                                if (!isInteractive) {
+                                    ring(bounds.cx, bounds.cy, radius, outRadius).draw()
+                                } else {
+                                    val count = (2 * PI * radius / (preferences.minCurveLength - 0.5)).toInt() // add -0.5 to guarantee turning into lines
+                                    val step = 2 * PI / count
+                                    for (i in 0 until count) {
+                                        val start = i * step
+                                        val end = (i + 1) * step
+                                        val sector = truncRingSector(bounds.cx, bounds.cy, radius, outRadius, start, end)
+                                        sector.draw()
+                                    }
+                                }
+                            }
+                        }
+
+                        else -> isoscelesTriangle(bounds).draw()
+                    }
+                }
+            }
+        }
     }
 
     override fun layer(
