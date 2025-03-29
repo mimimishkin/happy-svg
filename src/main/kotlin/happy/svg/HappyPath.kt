@@ -1,7 +1,6 @@
 package happy.svg
 
 import happy.svg.HappyWheels.scaled
-import path.utils.math.Transforms
 import path.utils.math.Vec2
 import path.utils.math.orZero
 import path.utils.paths.*
@@ -42,7 +41,7 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
     val nodes by lazy {
         val nodes = mutableListOf<HappyV>()
         var firstMove: Vec2? = null
-        var move: Vec2? = null
+        var lastMove: Vec2? = null
         var wasClosed = false
 
         fun makePoint(to: Vec2) {
@@ -52,7 +51,7 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
         }
         fun close() {
             if (!wasClosed) {
-                makePoint(move!!)
+                makePoint(lastMove!!)
 
                 if (firstMove != null)
                     makePoint(firstMove!!)
@@ -69,21 +68,19 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
             })
         }
 
-        validPath.minify().validate().simplify().iteratePath { command, _, _, moveTo ->
-            move = moveTo
+        validPath.minify().validate().simplify().iteratePathFull { command, _, _, moveTo ->
+            lastMove = moveTo
 
             when (command) {
                 is MoveTo -> {
                     if (firstMove == null) {
                         firstMove = command.p
-
-                        makePoint(move)
                     } else {
                         close()
                         wasClosed = false
-
-                        makePoint(move)
                     }
+
+                    makePoint(lastMove ?: command.p)
                 }
 
                 is LineTo -> makePoint(command.p)
