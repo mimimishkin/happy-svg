@@ -68,8 +68,6 @@ data class HappyShape(
             check(bounds != null) { "Bounds are null" }
         }
 
-        check(density in 0.1..100.0) { "Density must be between 0.1 and 100" }
-
         if (type == Circle) {
             check(bounds!!.w near bounds!!.h) { "Can't draw ellipse, only circles" }
         }

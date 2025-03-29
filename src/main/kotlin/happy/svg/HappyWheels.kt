@@ -3,6 +3,7 @@ package happy.svg
 import path.utils.math.Vec2
 import path.utils.paths.Bounds
 import java.awt.Color
+import kotlin.ranges.contains
 
 object HappyWheels  {
     interface Format {
@@ -153,7 +154,7 @@ object HappyWheels  {
                 params += "p3" to shapeBounds!!.h.scaled.toString()
             }
             if (shapeRotation != null) {
-                params += "p4" to shapeRotation.toString()
+                params += "p4" to shapeRotation!!.toString()
             }
             if (shapeFixed != null) {
                 params += "p5" to shapeFixed!!.symbol
@@ -162,38 +163,42 @@ object HappyWheels  {
                 params += "p6" to shapeSleeping!!.symbol
             }
             if (shapeDensity != null) {
-                params += "p7" to shapeDensity.toString()
+                check(shapeDensity!! in 0.0..100.0) { "Opacity must be between 0.1 and 100" }
+                params += "p7" to shapeDensity!!.scaled
             }
             if (shapeColor != null) {
-                params += "p8" to shapeColor.toString()
+                params += "p8" to shapeColor!!.toString()
             }
             if (shapeOutline != null) {
-                params += "p9" to shapeOutline.toString()
+                params += "p9" to shapeOutline!!.toString()
             }
             if (shapeOpacity != null) {
-                params += "p10" to shapeOpacity.toString()
+                check(shapeOpacity!! in 0..100) { "Opacity must be between 0.1 and 100" }
+                params += "p10" to shapeOpacity!!.toString()
             }
             if (shapeCollision != null) {
                 params += "p11" to shapeCollision!!.number.toString()
             }
             if (shapeInnerCutout != null) {
+                check(shapeInnerCutout!! in 0.0..100.0) { "Inner cutout must be between 0.1 and 100" }
                 params += "p12" to shapeInnerCutout!!.toString()
             }
             if (groupCenter != null) {
-                params += "x" to groupCenter!!.x.scaled.toString()
-                params += "y" to groupCenter!!.y.scaled.toString()
+                params += "x" to groupCenter!!.x.scaled
+                params += "y" to groupCenter!!.y.scaled
             }
             if (groupRotation != null) {
                 params += "r" to groupRotation!!.toString()
             }
             if (groupCenterOffset != null) {
-                params += "ox" to groupCenterOffset!!.x.scaled.toString()
-                params += "oy" to groupCenterOffset!!.y.scaled.toString()
+                params += "ox" to groupCenterOffset!!.x.scaled
+                params += "oy" to groupCenterOffset!!.y.scaled
             }
             if (groupIsForeground != null) {
                 params += "f" to groupIsForeground!!.toString()
             }
             if (groupOpacity != null) {
+                check(groupOpacity!! in 0..100) { "Opacity must be between 0.1 and 100" }
                 params += "o" to groupOpacity!!.toString()
             }
             if (groupSleeping != null) {
@@ -209,8 +214,8 @@ object HappyWheels  {
                 params += "v" to version!!
             }
             if (characterPosition != null) {
-                params += "x" to characterPosition!!.x.scaled.toString()
-                params += "y" to characterPosition!!.y.scaled.toString()
+                params += "x" to characterPosition!!.x.scaled
+                params += "y" to characterPosition!!.y.scaled
             }
             if (character != null) {
                 params += "c" to character!!.number.toString()
@@ -231,10 +236,10 @@ object HappyWheels  {
                 params += "f" to (!strokeOnly!!).symbol
             }
             if (pathId != null) {
-                params += "id" to pathId.toString()
+                params += "id" to pathId!!.toString()
             }
             if (nodesCount != null) {
-                params += "n" to nodesCount.toString()
+                params += "n" to nodesCount!!.toString()
             }
             params += unknown
 
@@ -247,6 +252,7 @@ object HappyWheels  {
 
     const val minVisibleArea = 2.0
 
+    val Float.scaled get() = "%.3f".format(this)
     val Double.scaled get() = "%.3f".format(this)
 
     val Boolean.symbol get() = if (this) "t" else "f"
