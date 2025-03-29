@@ -340,10 +340,20 @@ internal class HappyLayerImpl(
         innerCutout: Float,
         ignoreLayer: Boolean,
     ) {
+        if (path != null && path.size <= 2) {
+            return
+        }
+
         if (ignoreLayer) {
+            val happyPath = path?.let { HappyPath(it) }
+            val bounds = requireNotNull(happyPath?.bounds ?: bounds) { "Bounds are null" }
+            if (bounds.area < HappyWheels.minVisibleArea) {
+                return
+            }
+
             val shape = HappyShape(
                 type = type,
-                path = path?.let { HappyPath(it) },
+                path = happyPath,
                 bounds = bounds,
                 color = color,
                 outline = outline,
@@ -455,16 +465,24 @@ internal class HappyLayerImpl(
                         }
                     }
 
-                    fun Path.draw() = possiblyInteractiveShape(
-                        path = this.transformed(),
-                        color = color,
-                        outline = outline,
-                        isFixed = isFixed,
-                        isSleeping = isSleeping,
-                        density = density,
-                        collision = collision,
-                        ignoreLayer = true
-                    )
+                    fun Path.draw() {
+                        val path = this.transformed(transform)
+                        if (path.size <= 2) {
+                            return
+                        }
+
+                        possiblyInteractiveShape(
+                            path = path,
+                            color = color,
+                            outline = outline,
+                            isInteractive = isInteractive,
+                            isFixed = isFixed,
+                            isSleeping = isSleeping,
+                            density = density,
+                            collision = collision,
+                            ignoreLayer = true
+                        )
+                    }
 
                     when (type) {
                         Rectangle -> rect(bounds).draw()
