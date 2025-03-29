@@ -402,7 +402,11 @@ internal class HappyLayerImpl(
                             bounds.h * hypot(transform.m01, transform.m11)
                         )
 
-                        if (clipBounds?.overlap(bounds) != true) {
+                        if (clipBounds?.overlap(bounds) == false) {
+                            return
+                        }
+
+                        if (clip == null) {
                             return shape(
                                 type = type,
                                 path = null,
@@ -428,7 +432,11 @@ internal class HappyLayerImpl(
                             h = bounds.h
                         )
 
-                        if (clipBounds?.overlap(bounds) != true) {
+                        if (clipBounds?.overlap(bounds) == false) {
+                            return
+                        }
+
+                        if (clip == null) {
                             val rotation = transform.transform(bounds.center).angle(Vec2()).roundToInt()
                             return shape(
                                 type = type,
