@@ -520,7 +520,7 @@ internal class HappyLayerImpl(
             ).block()
         }
 
-        val fullTransform = transform?.pre(this.transform) ?: this.transform
+        val fullTransform = transform?.post(this.transform) ?: this.transform
         val fullClip = when {
             this.clip == null && clip == null -> null
             this.clip == null -> clip
