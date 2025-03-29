@@ -11,12 +11,7 @@ import path.utils.math.Vec2
 import path.utils.math.near
 import path.utils.paths.*
 import java.awt.Color
-import kotlin.math.PI
-import kotlin.math.acos
-import kotlin.math.atan2
-import kotlin.math.hypot
-import kotlin.math.roundToInt
-import kotlin.math.sin
+import kotlin.math.*
 
 @DslMarker
 annotation class HappyLayerDsl
