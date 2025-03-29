@@ -222,12 +222,12 @@ fun HappyLayer.picture(
 ) {
     val file = File(image)
     if (file.exists()) {
-        picture(file, viewport, aspectRatio, ignoreLayer, isSvg)
+        return picture(file, viewport, aspectRatio, ignoreLayer, isSvg)
     }
 
     val url = runCatching { URI.create(image).toURL() }
     if (url.isSuccess) {
-        picture(url.getOrThrow(), viewport, aspectRatio, ignoreLayer, isSvg)
+        return picture(url.getOrThrow(), viewport, aspectRatio, ignoreLayer, isSvg)
     }
 
     throw IllegalArgumentException("Can't load image from $image")
