@@ -59,6 +59,9 @@ interface HappyLayer {
         ignoreLayer: Boolean = false,
     )
 
+    /**
+     * @param reset resets [transform], [clip] and [preferences]
+     */
     fun layer(
         color: Color = this.color,
         outline: Color? = this.outline,
@@ -513,7 +516,7 @@ internal class HappyLayerImpl(
                 onGroup = onGroup,
                 transform = transform ?: Transforms.identical(),
                 clip = clip,
-                preferences = this.preferences
+                preferences = preferences ?: this.preferences
             ).block()
         }
 
