@@ -13,6 +13,8 @@ data class HappyGroup(
     override fun HappyWheels.Config.configure() {
         val bounds = shapes.map { (it.bounds ?: it.path?.bounds)!! }.reduce { a, b -> a union b }
         groupCenter = bounds.center
+        groupCenterOffset = -bounds.center
+        groupRotation = 0
         groupSleeping = isSleeping
         groupIsForeground = isForeground
         groupOpacity = opacity
