@@ -60,7 +60,10 @@ data class HappyLevel(
 
     override fun HappyWheels.Config.configure() {
         children += info
-        children += shapes
+        if (shapes.shapes.isNotEmpty())
+            children += shapes.shapes
+        if (groups.groups.isNotEmpty())
+            children += groups.groups
     }
 }
 
