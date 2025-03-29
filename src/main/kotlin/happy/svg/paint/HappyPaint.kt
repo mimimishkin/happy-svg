@@ -42,15 +42,15 @@ class HappyColor(
 class HappyLinearGradient(
     val start: Vec2,
     val end: Vec2,
-    val transform: MatrixTransform,
-    val stops: List<Pair<Double, Color>>
+    val stops: List<Pair<Double, Color>>,
+    val transform: MatrixTransform? = null,
 ) : HappyPaint {
     override fun doFill(prefs: HappyPreferences, doFill: (part: Path, color: Color) -> Unit) {
         val length = (end - start).length
         val fullTransform = Transforms
             .rotate(atan2(end.y - start.y, end.x - start.x))
             .translate(start.x, start.y)
-            .post(other = transform)
+            .let { transform?.pre(it) ?: it }
 
         Interpolation.doGradient(stops, length, prefs) { start, end, color ->
             val left = length * start - prefs.additionalGradientPartSize
@@ -66,8 +66,8 @@ class HappyRadialGradient(
     val center: Vec2,
     val focus: Vec2,
     val radius: Double,
-    val transform: MatrixTransform,
-    val stops: List<Pair<Double, Color>>
+    val stops: List<Pair<Double, Color>>,
+    val transform: MatrixTransform? = null,
 ) : HappyPaint {
     override fun doFill(prefs: HappyPreferences, doFill: (part: Path, color: Color) -> Unit) {
         Interpolation.doGradient(stops, radius, prefs) { start, end, color ->
@@ -76,7 +76,7 @@ class HappyRadialGradient(
             val inRadius = radius * end + prefs.additionalGradientPartSize
             val ring = ring(ringCenter.x, ringCenter.y, outRadius, inRadius)
 
-            doFill(ring.transformWith(transform), color)
+            doFill(transform?.let { ring.transformWith(it) } ?: ring, color)
         }
     }
 }
