@@ -73,6 +73,7 @@ interface HappyLayer {
         transform: MatrixTransform? = null,
         clip: Path? = null,
         preferences: HappyPreferences? = null,
+        reset: Boolean = false,
 
         block: HappyLayer.() -> Unit
     )
@@ -498,8 +499,18 @@ internal class HappyLayerImpl(
         transform: MatrixTransform?,
         clip: Path?,
         preferences: HappyPreferences?,
+        reset: Boolean,
         block: HappyLayer.() -> Unit
     ) {
+        if (reset) {
+            return HappyLayerImpl(
+                destination = destination,
+                transform = transform ?: Transforms.identical(),
+                clip = clip,
+                preferences = this.preferences
+            ).block()
+        }
+
         val fullTransform = transform?.pre(this.transform) ?: this.transform
         val fullClip = when {
             this.clip == null && clip == null -> null
@@ -525,6 +536,8 @@ internal class HappyLayerImpl(
             clip = fullClip?.transformWith(fullTransform),
             preferences = preferences ?: this.preferences,
         )
+
+        // TODO: do not create new layer if it can be emulated with this (i.e., when clip == null)
 
         builder.block()
     }
