@@ -62,10 +62,7 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
         val validPath = if (bounds.area > 20) {
             path
         } else {
-            path.transformWith(Transforms.scale(20 / bounds.area).apply {
-                preTranslate(-bounds.cx, -bounds.cy)
-                translate(bounds.cx, bounds.cy)
-            })
+            path.scale(20 / bounds.area, anchor = bounds.center)
         }
 
         validPath.minify().validate().simplify().iteratePathFull { command, _, _, moveTo ->
