@@ -30,7 +30,9 @@ data class HappyShape(
     override fun HappyWheels.Config.configure() {
         checkValid()
 
-        thisContent = path?.format().orEmpty()
+        if (path != null) {
+            children += path!!
+        }
 
         type = this@HappyShape.type
         shapeBounds = when (type) {
