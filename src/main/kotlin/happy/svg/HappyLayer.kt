@@ -448,7 +448,7 @@ internal class HappyLayerImpl(
                     }
 
                     fun Path.draw() = possiblyInteractiveShape(
-                        path = path.transformed(),
+                        path = this.transformed(),
                         color = color,
                         outline = outline,
                         isFixed = isFixed,
