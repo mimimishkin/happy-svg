@@ -1,7 +1,7 @@
 package happy.svg
 
 data class HappyGroup(
-    val shapes: MutableList<HappyShape>,
+    val shapes: MutableList<HappyShape> = mutableListOf(),
     var isSleeping: Boolean = false,
     var isForeground: Boolean = false,
     var opacity: Int = 100,
