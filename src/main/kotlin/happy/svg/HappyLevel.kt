@@ -79,15 +79,15 @@ fun happyLevel(
     block: HappyLevelBuilder.() -> Unit
 ): HappyLevel {
     val level = HappyLevel()
+    val layerImpl = HappyLayerImpl(
+        onShape = { level.shapes.shapes += it },
+        onGroup = { level.groups.groups += it },
+        preferences = preferences
+    )
 
     val builder = object : HappyLevelBuilder {
-        override fun info(block: HappyLevel.Info.() -> Unit) {
-            level.info.block()
-        }
-
-        override fun content(block: HappyLayer.() -> Unit) {
-            HappyLayerImpl(level.shapes, preferences = preferences).block()
-        }
+        override fun info(block: HappyLevel.Info.() -> Unit) = level.info.block()
+        override fun content(block: HappyLayer.() -> Unit) = layerImpl.block()
     }
 
     builder.block()

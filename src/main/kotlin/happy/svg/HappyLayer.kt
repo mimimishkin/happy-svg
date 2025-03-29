@@ -75,9 +75,28 @@ interface HappyLayer {
         preferences: HappyPreferences? = null,
         reset: Boolean = false,
 
+        group: HappyGroup? = null,
         block: HappyLayer.() -> Unit
     )
 }
+
+fun HappyLayer.group(
+    isSleeping: Boolean = false,
+    isForeground: Boolean = false,
+    opacity: Int = 100,
+    isFixed: Boolean = false,
+    isFixedAngle: Boolean = false,
+    block: HappyLayer.() -> Unit
+) = layer(
+    group = HappyGroup(
+        isSleeping = isSleeping,
+        isForeground = isForeground,
+        opacity = opacity,
+        isFixed = isFixed,
+        isFixedAngle = isFixedAngle,
+    ),
+    block = block,
+)
 
 fun HappyLayer.rectangle(
     bounds: Bounds,
@@ -284,7 +303,8 @@ fun HappyLayer.clip(
 // ------------------
 
 internal class HappyLayerImpl(
-    val destination: HappyLevel.Shapes,
+    val onShape: (HappyShape) -> Unit,
+    val onGroup: (HappyGroup) -> Unit,
 
     override val color: Color = Color(61, 136, 199),
     override val outline: Color? = null,
@@ -302,7 +322,6 @@ internal class HappyLayerImpl(
 ) : HappyLayer {
     val clipBounds by lazy { clip?.bounds }
 
-    // TODO: api to work with groups
     override fun shape(
         type: ShapeType,
         path: Path?,
@@ -319,7 +338,7 @@ internal class HappyLayerImpl(
         ignoreLayer: Boolean,
     ) {
         if (ignoreLayer) {
-            destination.shapes += HappyShape(
+            val shape = HappyShape(
                 type = type,
                 path = path?.let { HappyPath(it) },
                 bounds = bounds,
@@ -333,6 +352,8 @@ internal class HappyLayerImpl(
                 collision = collision,
                 innerCutout = innerCutout
             )
+
+            onShape(shape)
         } else {
             fun Path?.transformed(transform: MatrixTransform = this@HappyLayerImpl.transform) =
                 requireNotNull(this) { "Path is null" }.transformWith(transform).let { clip?.and(it) ?: it }
@@ -483,11 +504,13 @@ internal class HappyLayerImpl(
         clip: Path?,
         preferences: HappyPreferences?,
         reset: Boolean,
+        group: HappyGroup?,
         block: HappyLayer.() -> Unit
     ) {
         if (reset) {
             return HappyLayerImpl(
-                destination = destination,
+                onShape = onShape,
+                onGroup = onGroup,
                 transform = transform ?: Transforms.identical(),
                 clip = clip,
                 preferences = this.preferences
@@ -503,7 +526,8 @@ internal class HappyLayerImpl(
         }
 
         val builder = HappyLayerImpl(
-            destination = destination,
+            onShape = if (group == null) onShape else { shape: HappyShape -> group.shapes += shape },
+            onGroup = onGroup,
 
             color = color,
             outline = outline,
@@ -523,5 +547,6 @@ internal class HappyLayerImpl(
         // TODO: do not create new layer if it can be emulated with this (i.e., when clip == null)
 
         builder.block()
+        group?.let { onGroup(it) }
     }
 }
