@@ -15,6 +15,7 @@ import happy.svg.happyLevel
 import happy.svg.paint.HappyLinearGradient
 import happy.svg.paint.HappyRadialGradient
 import happy.svg.paint.art
+import happy.svg.paint.picture
 import happy.svg.polygon
 import happy.svg.rectangle
 import happy.svg.scale
@@ -22,6 +23,7 @@ import happy.svg.transform
 import happy.svg.translate
 import happy.svg.triangle
 import path.utils.math.Transforms
+import path.utils.math.Transforms.AspectRatio
 import path.utils.math.Vec2
 import path.utils.paths.Bounds
 import path.utils.paths.CapMode
@@ -31,6 +33,7 @@ import path.utils.paths.spiral
 import path.utils.paths.star
 import path.utils.paths.toSvg
 import java.awt.Color
+import java.io.File
 import kotlin.test.Test
 
 class GeneralTests {
@@ -246,6 +249,43 @@ class GeneralTests {
                     val spiralBone = spiral(start = Vec2(800.0, 300.0), end = Vec2(820.0, 310.0), coils = 7)
                     val spiral = spiralBone.outline(9.0, cap = CapMode.Round)
                     art(spiral, radialGradient)
+                }
+            }
+        }
+
+        println(level.format())
+    }
+
+    /**
+     * Manual inspection points:
+     * - Eleven characters should be drawn
+     * - There should not be any visual imperfections
+     */
+    @Test
+    fun `svg painting`() {
+        val level = happyLevel {
+            content {
+                val characters = listOf(
+                    "characters/EffectiveShopper.svg",
+                    "characters/ExplorerGuy.svg",
+                    "characters/HelicopterMan.svg",
+                    "characters/IrresponsibleDad.svg",
+                    "characters/IrresponsibleMom.svg",
+                    "characters/LawnmowerMan.svg",
+                    "characters/MopedCouple.svg",
+                    "characters/PogostickMan.svg",
+                    "characters/SantaClaus.svg",
+                    "characters/SegwayGuy.svg",
+                    "characters/WheelchairGuy.svg",
+                ).map { GeneralTests::class.java.getResourceAsStream(it)!! }
+
+
+                val bounds = Bounds(100.0, 100.0, 1000.0, 1000.0)
+                for ((i, stream) in characters.withIndex()) {
+                    group {
+                        val viewport = bounds.copy(x = 100.0 + i * 1000.0)
+                        picture(stream.buffered(), viewport, AspectRatio.XMidYMidMeet, isSvg = true)
+                    }
                 }
             }
         }
