@@ -61,9 +61,9 @@ data class HappyLevel(
     override fun HappyWheels.Config.configure() {
         children += info
         if (shapes.isNotEmpty())
-            children += shapes
+            children += shapes as HappyWheels.Format
         if (groups.isNotEmpty())
-            children += groups
+            children += groups as HappyWheels.Format
     }
 }
 
