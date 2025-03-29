@@ -9,7 +9,8 @@ import java.awt.Color
 
 data class HappyLevel(
     val info: Info = Info(),
-    val shapes: Shapes = Shapes()
+    val shapes: Shapes = Shapes(),
+    val groups: Groups = Groups(),
 ) : HappyWheels.Format {
     data class Info(
         var version: String = "1.97",
@@ -41,15 +42,25 @@ data class HappyLevel(
         override val tag = "shapes"
 
         override fun HappyWheels.Config.configure() {
-            childContents = shapes.map { it.format() }
+            children = shapes
+        }
+    }
+
+    data class Groups(
+        val groups: MutableList<HappyGroup> = mutableListOf()
+    ) : HappyWheels.Format {
+        override val tag = "groups"
+
+        override fun HappyWheels.Config.configure() {
+            children = groups
         }
     }
 
     override val tag = "levelXML"
 
     override fun HappyWheels.Config.configure() {
-        childContents += info.format()
-        childContents += shapes.format()
+        children += info
+        children += shapes
     }
 }
 
@@ -60,10 +71,13 @@ annotation class HappyLevelBuilderDsl
 interface HappyLevelBuilder {
     fun info(block: HappyLevel.Info.() -> Unit)
 
-    fun shapes(block: HappyLayer.() -> Unit)
+    fun content(block: HappyLayer.() -> Unit)
 }
 
-fun happyLevel(block: HappyLevelBuilder.() -> Unit): HappyLevel {
+fun happyLevel(
+    preferences: HappyPreferences = HappyPreferences.default,
+    block: HappyLevelBuilder.() -> Unit
+): HappyLevel {
     val level = HappyLevel()
 
     val builder = object : HappyLevelBuilder {
@@ -71,8 +85,8 @@ fun happyLevel(block: HappyLevelBuilder.() -> Unit): HappyLevel {
             level.info.block()
         }
 
-        override fun shapes(block: HappyLayer.() -> Unit) {
-            HappyLayerImpl(level.shapes, preferences = HappyPreferences.default).block()
+        override fun content(block: HappyLayer.() -> Unit) {
+            HappyLayerImpl(level.shapes, preferences = preferences).block()
         }
     }
 
