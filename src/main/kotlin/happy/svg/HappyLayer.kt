@@ -283,23 +283,6 @@ fun HappyLayer.clip(
 // ------ IMPL ------
 // ------------------
 
-fun main() {
-    val matrix = Transforms.rotate(/*2.0, */3.0, 10.0, 12.0)
-
-
-
-    val isReflection = (matrix.m00 * matrix.m11 - matrix.m01 * matrix.m10) < 0
-    val x = sin(acos(matrix.m00)) near matrix.m10
-
-    /*val rotation = if (scaleX >= 0 && scaleY >= 0) {
-        atan2(c, a)
-    } else {
-        TODO()
-    }*/
-
-
-}
-
 internal class HappyLayerImpl(
     val destination: HappyLevel.Shapes,
 
