@@ -4,13 +4,18 @@ import com.kitfox.svg.SVGDiagram
 import com.kitfox.svg.SVGUniverse
 import happy.svg.HappyLayer
 import happy.svg.HappyWheels.Collision
+import happy.svg.art
 import happy.svg.convert.HappyPreferences
+import happy.svg.isoscelesTriangle
+import happy.svg.possiblyInteractiveShape
+import happy.svg.transform
+import happy.svg.truncRingSector
 import path.utils.math.Transforms
+import path.utils.math.Transforms.AspectRatio
 import path.utils.math.near
 import path.utils.paths.*
 import java.awt.Color
 import java.awt.TexturePaint
-import java.awt.geom.Rectangle2D
 import java.awt.image.BufferedImage
 import java.io.File
 import java.io.Reader
@@ -19,8 +24,6 @@ import java.net.URL
 import java.util.*
 import javax.imageio.ImageIO
 import kotlin.math.PI
-import kotlin.math.cos
-import kotlin.math.sin
 
 inline fun HappyPaint.fill(
     path: Path?,
@@ -39,32 +42,16 @@ inline fun HappyPaint.fill(
 
 fun HappyLayer.possiblyInteractiveShape(
     path: Path,
-    color: Color = this.color,
-    outline: Color? = this.outline,
-    isInteractive: Boolean = this.isInteractive,
-    isFixed: Boolean = this.isFixed,
-    isSleeping: Boolean = this.isSleeping,
-    density: Float = this.density,
-    collision: Collision = this.collision
-) {
-    if (isInteractive) {
-        polygon(path, color, outline, isFixed, isSleeping, density, collision, path.bounds)
-    } else {
-        art(path, color, outline, path.bounds)
-    }
-}
-
-fun HappyLayer.possiblyInteractiveShape(
-    path: Path,
     paint: HappyPaint,
     isInteractive: Boolean = this.isInteractive,
     isFixed: Boolean = this.isFixed,
     isSleeping: Boolean = this.isSleeping,
     density: Float = this.density,
-    collision: Collision = this.collision
+    collision: Collision = this.collision,
+    ignoreLayer: Boolean = false,
 ) {
     paint.fill(path, preferences) { part, color ->
-        possiblyInteractiveShape(part, color, null, isInteractive, isFixed, isSleeping, density, collision)
+        possiblyInteractiveShape(part, color, null, isInteractive, isFixed, isSleeping, density, collision, ignoreLayer)
     }
 }
 
@@ -75,10 +62,9 @@ fun HappyLayer.rectangle(
     isFixed: Boolean = this.isFixed,
     isSleeping: Boolean = this.isSleeping,
     density: Float = this.density,
-    collision: Collision = this.collision
-) {
-    possiblyInteractiveShape(rect(bounds), paint, isInteractive, isFixed, isSleeping, density, collision)
-}
+    collision: Collision = this.collision,
+    ignoreLayer: Boolean = false,
+) = possiblyInteractiveShape(rect(bounds), paint, isInteractive, isFixed, isSleeping, density, collision, ignoreLayer)
 
 fun HappyLayer.circle(
     bounds: Bounds,
@@ -88,39 +74,38 @@ fun HappyLayer.circle(
     isSleeping: Boolean = this.isSleeping,
     density: Float = this.density,
     collision: Collision = this.collision,
-    innerCutout: Float = this.innerCutout
+    innerCutout: Float = this.innerCutout,
+    ignoreLayer: Boolean = false,
 ) {
-    fun simpleRingSector(cx: Double, cy: Double, outRadius: Double, innerRadius: Double, start: Double, end: Double) = mutablePath()
-        .moveTo(cx + outRadius * cos(start), cy + outRadius * sin(start))
-//        .arcTo(outRadius, outRadius, 0.0, false, true, cx + outRadius * cos(end), cy + outRadius * sin(end))
-        .lineTo(cx + outRadius * cos(end), cy + outRadius * sin(end))
-        .lineTo(cx + innerRadius * cos(end), cy + innerRadius * sin(end))
-//        .arcTo(innerRadius, innerRadius, 0.0, false, false, cx + innerRadius * cos(start), cy + innerRadius * sin(start))
-        .lineTo(cx + innerRadius * cos(start), cy + innerRadius * sin(start))
-        .close()
-
     require(bounds.w near bounds.h) { "Can't draw ellipse, only circles" }
 
     val radius = bounds.w / 2
     if (innerCutout == 0f) {
-        val circle = circle(bounds.cx, bounds.cy, radius)
-        possiblyInteractiveShape(circle, paint, isInteractive, isFixed, isSleeping, density, collision)
+        possiblyInteractiveShape(
+            path = circle(bounds.cx, bounds.cy, radius),
+            paint = paint,
+            isInteractive = isInteractive,
+            isFixed = isFixed,
+            isSleeping = isSleeping,
+            density = density,
+            collision = collision,
+            ignoreLayer = ignoreLayer,
+        )
     } else {
         val rightScale = innerCutout / 100 * (1 - 0.015)
         val outRadius = rightScale * radius
 
         if (!isInteractive) {
-            val ring = ring(bounds.cx, bounds.cy, radius, outRadius)
-            art(ring, paint)
+            art(ring(bounds.cx, bounds.cy, radius, outRadius), paint, ignoreLayer)
         } else {
             val sectorsCount = (2 * PI * radius / (preferences.minCurveLength - 0.5)).toInt() // add -0.5 to guarantee turning into lines
             val step = 2 * PI / sectorsCount
             for (i in 0 until sectorsCount) {
                 val start = i * step
                 val end = (i + 1) * step
-                val sector = simpleRingSector(bounds.cx, bounds.cy, radius, outRadius, start, end)
+                val sector = truncRingSector(bounds.cx, bounds.cy, radius, outRadius, start, end)
 
-                polygon(sector, paint, isFixed, isSleeping, density, collision)
+                polygon(sector, paint, isFixed, isSleeping, density, collision, ignoreLayer)
             }
         }
     }
@@ -133,16 +118,9 @@ fun HappyLayer.triangle(
     isFixed: Boolean = this.isFixed,
     isSleeping: Boolean = this.isSleeping,
     density: Float = this.density,
-    collision: Collision = this.collision
-) {
-    val triangle = mutablePath()
-        .moveTo(bounds.left, bounds.bottom)
-        .lineTo(bounds.cx, bounds.top)
-        .lineTo(bounds.right, bounds.bottom)
-        .close()
-
-    possiblyInteractiveShape(triangle, paint, isInteractive, isFixed, isSleeping, density, collision)
-}
+    collision: Collision = this.collision,
+    ignoreLayer: Boolean = false,
+) = possiblyInteractiveShape(isoscelesTriangle(bounds), paint, isInteractive, isFixed, isSleeping, density, collision, ignoreLayer)
 
 fun HappyLayer.polygon(
     path: Path,
@@ -150,41 +128,52 @@ fun HappyLayer.polygon(
     isFixed: Boolean = this.isFixed,
     isSleeping: Boolean = this.isSleeping,
     density: Float = this.density,
-    collision: Collision = this.collision
+    collision: Collision = this.collision,
+    ignoreLayer: Boolean = false,
 ) {
-    possiblyInteractiveShape(path, paint, true, isFixed, isSleeping, density, collision)
+    possiblyInteractiveShape(path, paint, true, isFixed, isSleeping, density, collision, ignoreLayer)
 }
 
 fun HappyLayer.art(
     path: Path,
     paint: HappyPaint,
+    ignoreLayer: Boolean = false,
 ) {
-    possiblyInteractiveShape(path, paint, false)
+    possiblyInteractiveShape(path, paint, false, ignoreLayer = ignoreLayer)
 }
 
 fun HappyLayer.picture(
     image: BufferedImage,
-    anchor: Bounds? = null,
+    viewport: Bounds? = null,
+    aspectRatio: AspectRatio = AspectRatio.None,
+    ignoreLayer: Boolean = false,
 ) {
-    val anchor = anchor ?: image.run { Bounds(0.0, 0.0, width.toDouble(), height.toDouble()) }
-    val texture = TexturePaint(image, anchor.run { Rectangle2D.Double(x, y, w, h) })
-    val paint = texture.toHappyPaint(anchor)
-    paint.fill(null, preferences) { part, color ->
-        art(part, color)
+    val anchor = image.raster.bounds.bounds2D
+    val bounds = anchor.run { Bounds(x, y, width, height) }
+    val paint = TexturePaint(image, anchor).toHappyPaint(bounds)
+    layer(
+        transform = viewport?.let { Transforms.rectToRect(bounds, it, aspectRatio) },
+        reset = ignoreLayer
+    ) {
+        paint.fill(null, preferences) { part, color -> art(part, color, null) }
     }
 }
 
 fun HappyLayer.picture(
     image: SVGDiagram,
-    bounds: Bounds? = null,
+    viewport: Bounds? = null,
+    aspectRatio: AspectRatio = AspectRatio.None,
+    ignoreLayer: Boolean = false,
 ) {
-    val viewport = image.viewRect.run { Bounds(x, y, width, height) }
-    if (bounds != null) {
-        transform(Transforms.rectToRect(viewport, bounds)) {
-            image.render(HappyGraphics(this))
-        }
-    } else {
-        image.render(HappyGraphics(this))
+    layer(
+        outline = null,
+        transform = viewport?.let {
+            val svgViewport = image.viewRect.run { Bounds(x, y, width, height) }
+            Transforms.rectToRect(svgViewport, it, aspectRatio)
+        },
+        reset = ignoreLayer
+    ) {
+        image.render(HappyGraphics { part, paint -> art(part, paint) })
     }
 }
 
@@ -197,42 +186,48 @@ internal fun SVGDiagram(reader: Reader): SVGDiagram {
 
 fun HappyLayer.picture(
     image: File,
-    bounds: Bounds? = null,
-    isSvg: Boolean = true
+    viewport: Bounds? = null,
+    aspectRatio: AspectRatio = AspectRatio.None,
+    ignoreLayer: Boolean = false,
+    isSvg: Boolean
 ) {
     if (isSvg) {
-        picture(SVGDiagram(image.reader()), bounds)
+        picture(SVGDiagram(image.reader()), viewport, aspectRatio, ignoreLayer)
     } else {
-        picture(ImageIO.read(image), bounds)
+        picture(ImageIO.read(image), viewport, aspectRatio, ignoreLayer)
     }
 }
 
 fun HappyLayer.picture(
     image: URL,
-    bounds: Bounds? = null,
-    isSvg: Boolean = true
+    viewport: Bounds? = null,
+    aspectRatio: AspectRatio = AspectRatio.None,
+    ignoreLayer: Boolean = false,
+    isSvg: Boolean
 ) {
     val inputStream = image.openStream()
     if (isSvg) {
-        picture(SVGDiagram(inputStream.reader()), bounds)
+        picture(SVGDiagram(inputStream.reader()), viewport, aspectRatio, ignoreLayer)
     } else {
-        picture(ImageIO.read(inputStream), bounds)
+        picture(ImageIO.read(inputStream), viewport, aspectRatio, ignoreLayer)
     }
 }
 
 fun HappyLayer.picture(
     image: String,
-    bounds: Bounds? = null,
-    isSvg: Boolean = true
+    viewport: Bounds? = null,
+    aspectRatio: AspectRatio = AspectRatio.None,
+    ignoreLayer: Boolean = false,
+    isSvg: Boolean
 ) {
     val file = File(image)
     if (file.exists()) {
-        picture(file, bounds, isSvg)
+        picture(file, viewport, aspectRatio, ignoreLayer, isSvg)
     }
 
     val url = runCatching { URI.create(image).toURL() }
     if (url.isSuccess) {
-        picture(url.getOrThrow(), bounds, isSvg)
+        picture(url.getOrThrow(), viewport, aspectRatio, ignoreLayer, isSvg)
     }
 
     throw IllegalArgumentException("Can't load image from $image")
