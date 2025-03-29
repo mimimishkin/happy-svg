@@ -38,7 +38,7 @@ data class HappyLevel(
 
     data class Shapes(
         val shapes: MutableList<HappyShape> = mutableListOf()
-    ) : HappyWheels.Format {
+    ) : HappyWheels.Format, MutableList<HappyShape> by shapes {
         override val tag = "shapes"
 
         override fun HappyWheels.Config.configure() {
@@ -48,7 +48,7 @@ data class HappyLevel(
 
     data class Groups(
         val groups: MutableList<HappyGroup> = mutableListOf()
-    ) : HappyWheels.Format {
+    ) : HappyWheels.Format, MutableList<HappyGroup> by groups {
         override val tag = "groups"
 
         override fun HappyWheels.Config.configure() {
@@ -60,10 +60,10 @@ data class HappyLevel(
 
     override fun HappyWheels.Config.configure() {
         children += info
-        if (shapes.shapes.isNotEmpty())
-            children += shapes.shapes
-        if (groups.groups.isNotEmpty())
-            children += groups.groups
+        if (shapes.isNotEmpty())
+            children += shapes
+        if (groups.isNotEmpty())
+            children += groups
     }
 }
 
@@ -83,8 +83,8 @@ fun happyLevel(
 ): HappyLevel {
     val level = HappyLevel()
     val layerImpl = HappyLayerImpl(
-        onShape = { level.shapes.shapes += it },
-        onGroup = { level.groups.groups += it },
+        onShape = { level.shapes += it },
+        onGroup = { level.groups += it },
         preferences = preferences
     )
 
