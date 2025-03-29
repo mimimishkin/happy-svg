@@ -7,7 +7,9 @@ import java.awt.Paint
 import java.awt.Shape
 import java.awt.geom.AffineTransform
 
-internal class HappyGraphics(val destination: HappyLayer) : AbstractGraphics2D() {
+internal class HappyGraphics(
+    val doFill: (part: Path, paint: HappyPaint) -> Unit
+) : AbstractGraphics2D() {
     private var pathClip: Path? = null
     private var matrixTransform = MatrixTransform()
     private var happyPaint: HappyPaint? = null
@@ -54,7 +56,7 @@ internal class HappyGraphics(val destination: HappyLayer) : AbstractGraphics2D()
             .let { pathClip?.and(it) ?: it }
 
         if (path.isNotEmpty()) {
-            destination.art(path, happyPaint ?: foreground.toHappyPaint(path.bounds))
+            doFill(path, happyPaint ?: foreground.toHappyPaint(path.bounds))
         }
     }
 }
