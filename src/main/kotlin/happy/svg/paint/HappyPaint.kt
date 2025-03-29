@@ -7,10 +7,12 @@ import happy.svg.convert.Vectorizing
 import path.utils.math.MatrixTransform
 import path.utils.math.Transforms
 import path.utils.math.Vec2
+import path.utils.math.lerp
 import path.utils.math.nearOrLess
 import path.utils.paths.*
+import path.utils.paths.circle
 import path.utils.paths.rect
-import path.utils.paths.ring
+import path.utils.paths.reversePath
 import path.utils.paths.transformWith
 import java.awt.Color
 import java.awt.LinearGradientPaint
@@ -71,10 +73,11 @@ class HappyRadialGradient(
 ) : HappyPaint {
     override fun doFill(prefs: HappyPreferences, doFill: (part: Path, color: Color) -> Unit) {
         Interpolation.doGradient(stops, radius, prefs) { start, end, color ->
-            val ringCenter = center * start + focus * (1 - start)
-            val outRadius = max(0.0, radius * start - prefs.additionalGradientPartSize)
-            val inRadius = radius * end + prefs.additionalGradientPartSize
-            val ring = ring(ringCenter.x, ringCenter.y, outRadius, inRadius)
+            val (outX, outY) = lerp(focus, center, start)
+            val outR = (radius * start - prefs.additionalGradientPartSize).coerceAtLeast(0.0)
+            val (inX, inY) = lerp(focus, center, end)
+            val inR = radius * end + prefs.additionalGradientPartSize
+            val ring = circle(outX, outY, outR) + circle(inX, inY, inR).reversePath()
 
             doFill(transform?.let { ring.transformWith(it) } ?: ring, color)
         }
