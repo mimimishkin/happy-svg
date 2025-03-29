@@ -2,6 +2,7 @@ package happy.svg.paint
 
 import happy.svg.HappyLayer
 import path.utils.math.MatrixTransform
+import path.utils.math.Transforms
 import path.utils.paths.*
 import java.awt.Paint
 import java.awt.Shape
@@ -11,7 +12,7 @@ internal class HappyGraphics(
     val doFill: (part: Path, paint: HappyPaint) -> Unit
 ) : AbstractGraphics2D() {
     private var pathClip: Path? = null
-    private var matrixTransform = MatrixTransform()
+    private var matrixTransform = Transforms.identical()
     private var happyPaint: HappyPaint? = null
 
     private var wasClipped = false
@@ -39,6 +40,10 @@ internal class HappyGraphics(
 
             matrixTransform = value.toMatrixTransform()
         }
+    override fun transform(Tx: AffineTransform) {
+        super.transform(Tx)
+        matrixTransform = _transform.toMatrixTransform()
+    }
 
     override var foreground: Paint
         get() = super.foreground
