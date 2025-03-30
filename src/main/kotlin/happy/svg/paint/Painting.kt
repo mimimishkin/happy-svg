@@ -150,7 +150,7 @@ fun HappyLayer.picture(
 ) {
     val anchor = image.raster.bounds.bounds2D
     val bounds = anchor.run { Bounds(x, y, width, height) }
-    val paint = TexturePaint(image, anchor).toHappyPaint(bounds)
+    val paint = HappyTexture(bounds, TexturePaint(image, anchor))
     layer(
         transform = viewport?.let { Transforms.rectToRect(bounds, it, aspectRatio) },
         reset = ignoreLayer
