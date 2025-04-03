@@ -24,15 +24,16 @@ data class HappyLevel(
     ) : HappyWheels.Format {
         override val tag = "info"
 
-        override fun HappyWheels.Config.configure() {
-            version = this@Info.version
-            characterPosition = this@Info.characterPosition
-            character = this@Info.character
-            forceCharacter = this@Info.forceCharacter
-            hideVehicle = this@Info.hideVehicle
-            backgroundType = this@Info.backgroundType
-            backgroundColor = this@Info.backgroundColor.decimal
-            unknown += "e" to this@Info.e.toString()
+        override fun params(param: (String, Any) -> Unit) {
+            param("v", version)
+            param("x", characterPosition.x)
+            param("y", characterPosition.y)
+            param("c", character.number)
+            param("f", forceCharacter)
+            param("h", hideVehicle)
+            param("bg", backgroundType.number)
+            param("bgc", backgroundColor.decimal)
+            param("e", e)
         }
     }
 
@@ -41,9 +42,8 @@ data class HappyLevel(
     ) : HappyWheels.Format, MutableList<HappyShape> by shapes {
         override val tag = "shapes"
 
-        override fun HappyWheels.Config.configure() {
-            children = shapes
-        }
+        override val children: List<HappyWheels.Format>
+            get() = shapes
     }
 
     data class Groups(
@@ -51,20 +51,14 @@ data class HappyLevel(
     ) : HappyWheels.Format, MutableList<HappyGroup> by groups {
         override val tag = "groups"
 
-        override fun HappyWheels.Config.configure() {
-            children = groups
-        }
+        override val children: List<HappyWheels.Format>
+            get() = groups
     }
 
     override val tag = "levelXML"
 
-    override fun HappyWheels.Config.configure() {
-        children += info
-        if (shapes.isNotEmpty())
-            children += shapes as HappyWheels.Format
-        if (groups.isNotEmpty())
-            children += groups as HappyWheels.Format
-    }
+    override val children: List<HappyWheels.Format>
+        get() = listOfNotNull(info, shapes.takeIf { it.isNotEmpty() }, groups.takeIf { it.isNotEmpty() })
 }
 
 @DslMarker

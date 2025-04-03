@@ -21,8 +21,8 @@ object Interpolation {
     }
 
     fun interpolateInList(stops: List<Pair<Double, Color>>, progress: Double): Color {
-        val (leftBound, leftColor) = stops.findLast { it.first < progress } ?: stops.first()
-        val (rightBound, rightColor) = stops.find { it.first > progress } ?: stops.last()
+        val (leftBound, leftColor) = stops.findLast { it.first < progress } ?: stops[0]
+        val (rightBound, rightColor) = stops.find { it.first > progress } ?: stops[stops.lastIndex]
         val subProgress = (progress - leftBound) / (rightBound - leftBound)
         return interpolateInPair(leftColor, rightColor, subProgress.coerceIn(0.0..1.0))
     }

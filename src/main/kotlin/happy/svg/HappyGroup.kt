@@ -10,16 +10,22 @@ data class HappyGroup(
 ) : HappyWheels.Format {
     override val tag = "g"
 
-    override fun HappyWheels.Config.configure() {
+    override fun params(param: (String, Any) -> Unit) {
+        check(opacity in 0..100) { "Opacity must be between 0 and 100" }
+
         val bounds = shapes.map { (it.bounds ?: it.path?.bounds)!! }.reduce { a, b -> a union b }
-        groupCenter = bounds.center
-        groupCenterOffset = -bounds.center
-        groupRotation = 0
-        groupSleeping = isSleeping
-        groupIsForeground = isForeground
-        groupOpacity = opacity
-        groupIsFixed = isFixed
-        groupIsFixedAngle = isFixedAngle
-        children = shapes
+        param("x", bounds.center.x)
+        param("y", bounds.center.y)
+        param("r", 0)
+        param("ox", -bounds.center.x)
+        param("oy", -bounds.center.y)
+        param("f", isForeground)
+        param("o", opacity)
+        param("s", isSleeping)
+        param("im", isFixed)
+        param("fr", isFixedAngle)
     }
+
+    override val children: List<HappyWheels.Format>
+        get() = shapes
 }

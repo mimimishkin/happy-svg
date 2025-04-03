@@ -3,7 +3,6 @@ package happy.svg
 import happy.svg.HappyWheels.Collision
 import happy.svg.HappyWheels.ShapeType
 import happy.svg.HappyWheels.ShapeType.*
-import happy.svg.HappyWheels.decimal
 import path.utils.math.near
 import path.utils.paths.Bounds
 import java.awt.Color
@@ -27,15 +26,14 @@ data class HappyShape(
 ) : HappyWheels.Format {
     override val tag = "sh"
 
-    override fun HappyWheels.Config.configure() {
+    override fun params(param: (String, Any) -> Unit) {
         checkValid()
 
-        if (path != null) {
-            children += path!!
-        }
+        param("t", type.number)
+        if (type != Polygon)
+            param("i", isInteractive)
 
-        type = this@HappyShape.type
-        shapeBounds = when (type) {
+        val bounds = when (type) {
             Art, Polygon -> path!!.bounds
             Triangle -> bounds!!.copy().apply {
                 // happy wheels render triangles with this offset ¯\(0_o)/¯
@@ -45,21 +43,25 @@ data class HappyShape(
             }
             else -> bounds!!
         }
-        shapeRotation = rotation
-        shapeColor = color.decimal
-        shapeOutline = outline?.decimal
-        shapeOpacity = (color.alpha / 255f * 100).roundToInt()
-        if (type != Polygon) {
-            shapeInteractive = isInteractive
-        }
-        shapeFixed = isFixed
-        shapeSleeping = isSleeping
-        shapeDensity = density
-        shapeCollision = Collision.Everything
-        if (type == Circle) {
-            shapeInnerCutout = innerCutout
-        }
+        param("p0", bounds.cx)
+        param("p1", bounds.cy)
+        param("p2", bounds.w)
+        param("p3", bounds.h)
+        param("p4", rotation)
+        param("p5", isFixed)
+        param("p6", isSleeping)
+        param("p7", density)
+        param("p8", color)
+        param("p9", (outline ?: -1))
+        param("p10", (color.alpha / 255f * 100).roundToInt())
+        param("p11", collision.number)
+
+        if (type == Circle)
+            param("p12", innerCutout)
     }
+
+    override val children: List<HappyWheels.Format>
+        get() = listOfNotNull(path)
 
     fun checkValid() {
         if (type == Polygon || type == Art) {
@@ -70,8 +72,11 @@ data class HappyShape(
             check(bounds != null) { "Bounds are null" }
         }
 
+        check(density in 0.0..100.0) { "Density must be between 0.1 and 100" }
+
         if (type == Circle) {
             check(bounds!!.w near bounds!!.h) { "Can't draw ellipse, only circles" }
+            check(innerCutout in 0.0..100.0) { "Inner cutout must be between 0.1 and 100" }
         }
     }
 }
@@ -150,8 +155,7 @@ fun HappyTriangle(
     collision = collision
 )
 
-// TODO: 1. check for flat path 
-// TODO: 2. check for max node count - 10
+// TODO: 1. check for flat path and path direction
 fun HappyPolygon(
     path: HappyPath,
     color: Color,

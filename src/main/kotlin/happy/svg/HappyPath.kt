@@ -6,6 +6,7 @@ import path.utils.math.distToSq
 import path.utils.math.orZero
 import path.utils.paths.*
 import path.utils.paths.Command.*
+import kotlin.collections.plusAssign
 import kotlin.math.abs
 
 class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Format {
@@ -18,9 +19,9 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
         var leftAnchor: Vec2? = null,
         var rightAnchor: Vec2? = null,
     ) {
-        fun format(index: Int): String {
+        override fun toString(): String {
             val needAnchors = (leftAnchor == null || leftAnchor!! near point) && (rightAnchor == null || rightAnchor!! near point)
-            val value = if (needAnchors) {
+            return if (needAnchors) {
                 val (px, py) = point - bounds.center
                 "${px.scaled}_${py.scaled}"
             } else {
@@ -29,8 +30,6 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
                 val (a2x, a2y) = rightAnchor?.let { it - point }.orZero()
                 "${px.scaled}_${py.scaled}_${a1x.scaled}_${a1y.scaled}_${a2x.scaled}_${a2y.scaled}"
             }
-
-            return "v$index=\"$value\""
         }
     }
 
@@ -120,10 +119,10 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
         nodes
     }
 
-    override fun HappyWheels.Config.configure() {
-        strokeOnly = this@HappyPath.strokeOnly
-        pathId = id
-        nodesCount = nodes.size
-        thisContent = nodes.withIndex().joinToString(separator = " ") { (i, v) -> v.format(i) }
+    override fun params(param: (String, Any) -> Unit) {
+        param("f", !strokeOnly)
+        param("id", id)
+        param("n", nodes.size)
+        nodes.forEachIndexed { i, node -> param("v$i",  node) }
     }
 }

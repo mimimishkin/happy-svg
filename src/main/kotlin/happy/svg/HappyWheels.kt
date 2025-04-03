@@ -1,42 +1,54 @@
 package happy.svg
 
-import path.utils.math.Vec2
 import path.utils.paths.Bounds
 import java.awt.Color
-import java.util.Locale
-import kotlin.ranges.contains
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.*
 
 object HappyWheels  {
     interface Format {
         val tag: String
+        val children: List<Format> get() = emptyList()
 
-        fun Config.configure()
+        fun params(param: (key: String, value: Any) -> Unit) {}
 
-        fun format(): String = with(Config().apply { configure() }) {
-            buildString {
-                append("<$tag ")
-                for ((key, value) in namedParams) {
-                    append("$key=\"$value\" ")
+        fun format(level: Int = 0, builder: StringBuilder) {
+            fun Any.toParamString(): String = when (this) {
+                is String -> this
+                is Float -> scaled
+                is Double -> scaled
+                is Boolean -> symbol
+                is Color -> decimal.toString()
+                else -> toString()
+            }
+
+            with(builder) {
+                val space = "    ".repeat(level)
+                append(space)
+                append("<$tag")
+                params { key, value ->
+                    append(" $key=\"${value.toParamString()}\"")
                 }
-                deleteAt(lastIndex)
-
-                if (thisContent.isNotEmpty()) {
-                    append(' ')
-                    append(thisContent)
-                }
+//                namedParams.asIterable().joinTo(this, separator = "") { (key, value) ->
+//                    " $key=\"${value.toParamString()}\""
+//                }
 
                 if (children.isNotEmpty()) {
                     append(">\n")
                     for (child in children) {
-                        val child = child.format().replace("\n", "\n    ")
-                        append("    $child\n")
+                        child.format(level + 1, builder)
+                        append("\n")
                     }
+                    append(space)
                     append("</$tag>")
                 } else {
                     append("/>")
                 }
             }
         }
+
+        fun format() = StringBuilder().also { format(level = 0, builder = it) }.toString()
     }
 
     enum class Character(val number: Int) {
@@ -106,157 +118,13 @@ object HappyWheels  {
         Rectangle(0), Circle(1), Triangle(2), Polygon(3), Art(4)
     }
 
-    class Config {
-        var type: ShapeType? = null
-        var shapeInteractive: Boolean? = null
-        var shapeBounds: Bounds? = null
-        var shapeRotation: Int? = null
-        var shapeFixed: Boolean? = null
-        var shapeSleeping: Boolean? = null
-        var shapeDensity: Float? = null
-        var shapeColor: Int? = null
-        var shapeOutline: Int? = null
-        var shapeOpacity: Int? = null
-        var shapeCollision: Collision? = null
-        var shapeInnerCutout: Float? = null
-        var groupCenter: Vec2? = null
-        var groupRotation: Int? = null
-        var groupCenterOffset: Vec2? = null
-        var groupIsForeground: Boolean? = null
-        var groupOpacity: Int? = null
-        var groupSleeping: Boolean? = null
-        var groupIsFixed: Boolean? = null
-        var groupIsFixedAngle: Boolean? = null
-        var version: String? = null
-        var characterPosition: Vec2? = null
-        var character: Character? = null
-        var forceCharacter: Boolean? = null
-        var hideVehicle: Boolean? = null
-        var backgroundType: Background? = null
-        var backgroundColor: Int? = null
-        var strokeOnly: Boolean? = null
-        var pathId: Int? = null
-        var nodesCount: Int? = null
-        val unknown: MutableMap<String, String> = mutableMapOf()
-
-        var thisContent: String = ""
-        var children: List<Format> = emptyList()
-
-        val namedParams: Map<String, String> get() {
-            val params = mutableMapOf<String, String>()
-
-            if (type != null) {
-                params += "t" to type!!.number.toString()
-            }
-            if (shapeInteractive != null) {
-                params += "i" to shapeInteractive!!.symbol
-            }
-            if (shapeBounds != null) {
-                params += "p0" to shapeBounds!!.cx.scaled.toString()
-                params += "p1" to shapeBounds!!.cy.scaled.toString()
-                params += "p2" to shapeBounds!!.w.scaled.toString()
-                params += "p3" to shapeBounds!!.h.scaled.toString()
-            }
-            if (shapeRotation != null) {
-                params += "p4" to shapeRotation!!.toString()
-            }
-            if (shapeFixed != null) {
-                params += "p5" to shapeFixed!!.symbol
-            }
-            if (shapeSleeping != null) {
-                params += "p6" to shapeSleeping!!.symbol
-            }
-            if (shapeDensity != null) {
-                check(shapeDensity!! in 0.0..100.0) { "Opacity must be between 0.1 and 100" }
-                params += "p7" to shapeDensity!!.scaled
-            }
-            if (shapeColor != null) {
-                params += "p8" to shapeColor!!.toString()
-            }
-            if (shapeOutline != null) {
-                params += "p9" to shapeOutline!!.toString()
-            }
-            if (shapeOpacity != null) {
-                check(shapeOpacity!! in 0..100) { "Opacity must be between 0.1 and 100" }
-                params += "p10" to shapeOpacity!!.toString()
-            }
-            if (shapeCollision != null) {
-                params += "p11" to shapeCollision!!.number.toString()
-            }
-            if (shapeInnerCutout != null) {
-                check(shapeInnerCutout!! in 0.0..100.0) { "Inner cutout must be between 0.1 and 100" }
-                params += "p12" to shapeInnerCutout!!.toString()
-            }
-            if (groupCenter != null) {
-                params += "x" to groupCenter!!.x.scaled
-                params += "y" to groupCenter!!.y.scaled
-            }
-            if (groupRotation != null) {
-                params += "r" to groupRotation!!.toString()
-            }
-            if (groupCenterOffset != null) {
-                params += "ox" to groupCenterOffset!!.x.scaled
-                params += "oy" to groupCenterOffset!!.y.scaled
-            }
-            if (groupIsForeground != null) {
-                params += "f" to groupIsForeground!!.toString()
-            }
-            if (groupOpacity != null) {
-                check(groupOpacity!! in 0..100) { "Opacity must be between 0.1 and 100" }
-                params += "o" to groupOpacity!!.toString()
-            }
-            if (groupSleeping != null) {
-                params += "s" to groupSleeping!!.symbol
-            }
-            if (groupIsFixed != null) {
-                params += "im" to groupIsFixed!!.symbol
-            }
-            if (groupIsFixedAngle != null) {
-                params += "fr" to  groupIsFixedAngle!!.symbol
-            }
-            if (version != null) {
-                params += "v" to version!!
-            }
-            if (characterPosition != null) {
-                params += "x" to characterPosition!!.x.scaled
-                params += "y" to characterPosition!!.y.scaled
-            }
-            if (character != null) {
-                params += "c" to character!!.number.toString()
-            }
-            if (forceCharacter != null) {
-                params += "f" to forceCharacter!!.symbol
-            }
-            if (hideVehicle != null) {
-                params += "h" to hideVehicle!!.symbol
-            }
-            if (backgroundType != null) {
-                params += "bg" to backgroundType!!.number.toString()
-            }
-            if (backgroundColor != null) {
-                params += "bgc" to backgroundColor!!.toString()
-            }
-            if (strokeOnly != null) {
-                params += "f" to (!strokeOnly!!).symbol
-            }
-            if (pathId != null) {
-                params += "id" to pathId!!.toString()
-            }
-            if (nodesCount != null) {
-                params += "n" to nodesCount!!.toString()
-            }
-            params += unknown
-
-            return params
-        }
-    }
-
     const val minVisibleAlpha = 2.55
 
     const val minVisibleArea = 2.0
 
-    val Float.scaled get() = String.format(Locale.US, "%.3f", this)
-    val Double.scaled get() = String.format(Locale.US, "%.3f", this)
+    private val formatter = DecimalFormat("#.###", DecimalFormatSymbols(Locale.US))
+    val Float.scaled get() = formatter.format(this)!!
+    val Double.scaled get() = formatter.format(this)!!
 
     val Boolean.symbol get() = if (this) "t" else "f"
 
