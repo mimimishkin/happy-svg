@@ -64,4 +64,10 @@ Here, every element will be on top of the previous.
 
 ## Samples
 
-See helpful samples in [tests](src/test/kotlin/GeneralTests.kt).
+See helpful samples in [tests](src/test/kotlin/GeneralTests.kt), here are their outputs:
+
+<img src="screenshots/just%20shapes.png" title="Just shapes" width="250" height="250"/>
+<img src="screenshots/interactive%20custom%20shapes.png" title="Interactive custom shapes" width="250" height="250"/>
+<img src="screenshots/gradients.png" title="Gradients painting" width="250" height="250"/>
+<img src="screenshots/svg%20painting.png" title="Vector graphics painting" width="250" height="250"/>
+<img src="screenshots/raster%20painting.png" title="Raster graphics painting" width="250" height="250"/>
