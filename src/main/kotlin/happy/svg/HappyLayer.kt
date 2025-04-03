@@ -421,7 +421,7 @@ internal class HappyLayerImpl(
                             return
                         }
 
-                        if (clip == null) {
+                        if (!(type == Circle && !(bounds.w near bounds.h)) && clip == null) {
                             return shape(
                                 type = type,
                                 path = null,
