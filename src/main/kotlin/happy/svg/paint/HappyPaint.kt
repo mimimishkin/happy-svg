@@ -3,7 +3,7 @@ package happy.svg.paint
 import happy.svg.HappyWheels
 import happy.svg.convert.HappyPreferences
 import happy.svg.convert.Interpolation
-import happy.svg.convert.Vectorizing
+import happy.svg.convert.Pixelating
 import path.utils.math.MatrixTransform
 import path.utils.math.Transforms
 import path.utils.math.Vec2
@@ -89,6 +89,7 @@ class HappyTexture(
     val texture: AwtPaint
 ) : HappyPaint {
     override fun doFill(prefs: HappyPreferences, doFill: (part: Path, color: Color) -> Unit) {
+        val px = prefs.pixelSize
         if (texture is TexturePaint) {
             val anchorRect = texture.anchorRect.run { Bounds(x, y, width, height) }
 
@@ -98,70 +99,62 @@ class HappyTexture(
 
             if (canMoveAndTruncate) {
                 var image = texture.image
+                var width = image.width
+                var height = image.height
 
-                return if (prefs.doVectorizing) {
-                    Vectorizing.doVectorize(image, fillBounds.x, fillBounds.y, prefs.pixelSize, doFill)
-                } else {
-                    var width = image.width
-                    var height = image.height
+                var scaleX = anchorRect.w / width
+                var scaleY = anchorRect.h / height
 
-                    var scaleX = anchorRect.w / width
-                    var scaleY = anchorRect.h / height
-
-                    val min = min(scaleX, scaleY)
-                    // if a pixel width or height is smaller than min pixel size, increase
-                    // pixel sides proportionally and decrease image width and height
-                    if (min < prefs.pixelSize) {
-                        if (scaleX <= scaleY) {
-                            scaleY = max(scaleX, scaleY) * (prefs.pixelSize / min)
-                            scaleX = prefs.pixelSize
-                        } else {
-                            scaleX = max(scaleX, scaleY) * (prefs.pixelSize / min)
-                            scaleY = prefs.pixelSize
-                        }
-
-                        width = (width / scaleX).roundToInt()
-                        height = (height / scaleY).roundToInt()
-                        image = image.scale(width, height).toBuffered()
-
-                        // compute right pixel width and height
-                        scaleX = anchorRect.w / width
-                        scaleY = anchorRect.h / height
+                val min = min(scaleX, scaleY)
+                // if a pixel width or height is smaller than min pixel size, increase
+                // pixel sides proportionally and decrease image width and height
+                if (min < px) {
+                    if (scaleX <= scaleY) {
+                        scaleY = max(scaleX, scaleY) * (px / min)
+                        scaleX = px
+                    } else {
+                        scaleX = max(scaleX, scaleY) * (px / min)
+                        scaleY = px
                     }
 
-                    Vectorizing.doPixilate(image, fillBounds.x, fillBounds.y, scaleX, scaleY, prefs.colorCounts) { x, y, w, h, color ->
-                        doFill(rect(x, y, w, h), color)
-                    }
+                    width = (width / scaleX).roundToInt()
+                    height = (height / scaleY).roundToInt()
+                    image = image.scale(width, height).toBuffered()
+
+                    // compute right pixel width and height
+                    scaleX = anchorRect.w / width
+                    scaleY = anchorRect.h / height
                 }
+
+                return Pixelating.doPixelate(image, fillBounds.x, fillBounds.y, scaleX, scaleY, prefs, doFill)
             }
         }
 
-
+        // can't just use BufferedImage from texture => get raster from paint and pixelate it
 
         val levelRect = Rectangle(0, 0, 20000, 10000)
         val pathRect = fillBounds.run { Rectangle2D.Double(x, y, w, h) }.bounds
         val context = texture.createContext(ColorModel.getRGBdefault(), levelRect, levelRect, null, prefs.hints)
 
         val readable = pathRect.run { context.getRaster(x, y, width, height) }
-        val writable = readable.createCompatibleWritableRaster()
-        writable.setDataElements(0, 0, readable)
+        val writable = readable.createCompatibleWritableRaster().apply { setDataElements(0, 0, readable) }
         var image = BufferedImage(context.colorModel, writable, context.colorModel.isAlphaPremultiplied, null)
 
-        return if (prefs.doVectorizing) {
-            Vectorizing.doVectorize(image, fillBounds.x, fillBounds.y, prefs.pixelSize, doFill)
-        } else {
-            if (prefs.pixelSize > 1.0) {
-                val width = (image.width / prefs.pixelSize).roundToInt()
-                val height = (image.height / prefs.pixelSize).roundToInt()
-                image = image.scale(width, height).toBuffered()
-            }
-            val px = (fillBounds.h / image.width).coerceAtLeast(prefs.pixelSize)
-            val py = (fillBounds.w / image.height).coerceAtLeast(prefs.pixelSize)
-
-            Vectorizing.doPixilate(image, fillBounds.x, fillBounds.y, px, py, prefs.colorCounts) { x, y, w, h, color ->
-                doFill(rect(x, y, w, h), color)
-            }
+        if (px > 1.0) {
+            val width = (image.width / px).roundToInt()
+            val height = (image.height / px).roundToInt()
+            image = image.scale(width, height).toBuffered()
         }
+
+        return Pixelating.doPixelate(
+            img = image,
+            translateX = fillBounds.x,
+            translateY = fillBounds.y,
+            scaleX = (fillBounds.h / image.width).coerceAtLeast(px),
+            scaleY = (fillBounds.w / image.height).coerceAtLeast(px),
+            preferences = prefs,
+            doFill = doFill
+        )
     }
 }
 

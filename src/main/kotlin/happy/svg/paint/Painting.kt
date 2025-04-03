@@ -17,10 +17,14 @@ import path.utils.paths.*
 import java.awt.Color
 import java.awt.TexturePaint
 import java.awt.image.BufferedImage
+import java.io.BufferedInputStream
 import java.io.File
 import java.io.InputStream
 import java.io.Reader
 import java.net.URI
+import java.net.URLConnection
+import java.nio.file.Files
+import java.nio.file.spi.FileTypeDetector
 import java.util.*
 import javax.imageio.ImageIO
 import kotlin.math.PI
@@ -189,9 +193,9 @@ fun HappyLayer.picture(
     viewport: Bounds? = null,
     aspectRatio: AspectRatio = AspectRatio.None,
     ignoreLayer: Boolean = false,
-    isSvg: Boolean
 ) {
-    if (isSvg) {
+    val type = Files.probeContentType(image.toPath())
+    if ("svg" in type) {
         picture(SVGDiagram(image.reader()), viewport, aspectRatio, ignoreLayer)
     } else {
         picture(ImageIO.read(image), viewport, aspectRatio, ignoreLayer)
@@ -203,12 +207,13 @@ fun HappyLayer.picture(
     viewport: Bounds? = null,
     aspectRatio: AspectRatio = AspectRatio.None,
     ignoreLayer: Boolean = false,
-    isSvg: Boolean
 ) {
-    if (isSvg) {
-        picture(SVGDiagram(image.bufferedReader()), viewport, aspectRatio, ignoreLayer)
+    val image = image as? BufferedInputStream ?: image.buffered()
+    val type = URLConnection.guessContentTypeFromStream(image)
+    if ("xml" in type) {
+        picture(SVGDiagram(image.reader()), viewport, aspectRatio, ignoreLayer)
     } else {
-        picture(ImageIO.read(image.buffered()), viewport, aspectRatio, ignoreLayer)
+        picture(ImageIO.read(image), viewport, aspectRatio, ignoreLayer)
     }
 }
 
@@ -217,16 +222,15 @@ fun HappyLayer.picture(
     viewport: Bounds? = null,
     aspectRatio: AspectRatio = AspectRatio.None,
     ignoreLayer: Boolean = false,
-    isSvg: Boolean
 ) {
     val file = File(image)
     if (file.exists()) {
-        return picture(file, viewport, aspectRatio, ignoreLayer, isSvg)
+        return picture(file, viewport, aspectRatio, ignoreLayer)
     }
 
     val url = runCatching { URI.create(image).toURL() }
     if (url.isSuccess) {
-        return picture(url.getOrThrow().openStream(), viewport, aspectRatio, ignoreLayer, isSvg)
+        return picture(url.getOrThrow().openStream().buffered(), viewport, aspectRatio, ignoreLayer)
     }
 
     throw IllegalArgumentException("Can't load image from $image")

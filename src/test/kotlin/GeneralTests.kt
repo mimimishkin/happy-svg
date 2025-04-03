@@ -10,6 +10,7 @@ import happy.svg.HappyWheels
 import happy.svg.art
 import happy.svg.circle
 import happy.svg.clip
+import happy.svg.convert.HappyPreferences
 import happy.svg.group
 import happy.svg.happyLevel
 import happy.svg.paint.HappyLinearGradient
@@ -219,7 +220,7 @@ class GeneralTests {
      */
     @Test
     fun `gradient painting`() {
-        val level = happyLevel {
+        val level = happyLevel(preferences = HappyPreferences.default/*.copy(additionalGradientPartSize = 2.0)*/) {
             content {
                 val stops = listOf(
                     0.0 to Color(181, 148, 255, 255),
@@ -284,9 +285,23 @@ class GeneralTests {
                 for ((i, stream) in characters.withIndex()) {
                     group {
                         val viewport = bounds.copy(x = 100.0 + i * 1000.0)
-                        picture(stream.buffered(), viewport, AspectRatio.XMidYMidMeet, isSvg = true)
+                        picture(stream.buffered(), viewport, AspectRatio.XMidYMidMeet)
                     }
                 }
+            }
+        }
+
+        println(level.format())
+    }
+
+    @Test
+    fun `raster painting`() {
+        val level = happyLevel {
+            content {
+                val emoji = GeneralTests::class.java.getResourceAsStream("emoji.png")!!
+
+                preferences.colorCounts = 128
+                picture(emoji)
             }
         }
 

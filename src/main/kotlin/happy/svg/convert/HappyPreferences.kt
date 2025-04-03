@@ -1,6 +1,5 @@
 package happy.svg.convert
 
-import happy.svg.HappyWheels
 import java.awt.RenderingHints
 
 data class HappyPreferences(
@@ -17,21 +16,25 @@ data class HappyPreferences(
      */
     var colorCounts: Int,
     /**
+     * size to add to every pixel's each side
+     */
+    var additionalPixelSize: Double,
+    /**
+     * do merge multiple pixels shapes with one color into one enormous shape
+     */
+    var mergePixels: Boolean,
+    /**
      * size to add to every gradient part to avoid spaces
      */
     var additionalGradientPartSize: Double,
     /**
-     * rendering hints for vectorizing
+     * rendering hints for pixelating
      */
     var hints: RenderingHints,
     /**
-     * size of pixel for vectorizing
+     * size of pixel for pixelating
      */
     var pixelSize: Double,
-    /**
-     * do vectorizing or not
-     */
-    var doVectorizing: Boolean,
     /**
      * curves with length less than this will turn into lines
      */
@@ -41,12 +44,13 @@ data class HappyPreferences(
         val default = HappyPreferences(
             minColorDifference = 0.05,
             minGradientPartSize = 2.5,
-            colorCounts = 256,
+            colorCounts = 32,
+            additionalPixelSize = 0.075,
+            mergePixels = true,
             additionalGradientPartSize = 0.1,
             hints = RenderingHints(null),
-            pixelSize = 5.0,
-            doVectorizing = true,
-            minCurveLength = 5.5
+            pixelSize = 2.0,
+            minCurveLength = 5.5,
         )
     }
 }

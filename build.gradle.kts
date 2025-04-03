@@ -14,6 +14,5 @@ java {
 dependencies {
     implementation(libs.pathUtils)
     implementation(libs.svgSalamander)
-    implementation(libs.imageTracer)
     testImplementation(kotlin("test"))
 }
