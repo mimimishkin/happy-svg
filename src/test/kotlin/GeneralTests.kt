@@ -186,7 +186,7 @@ class GeneralTests {
     fun `level dsl clipping`() {
         val level = happyLevel {
             content {
-                layer {
+                layer(isInteractive = true) {
                     val bounds = Bounds(0.0, 0.0, 100.0, 100.0)
 
                     clip(Bounds(x = 0.0, y = 0.0, w = 50.0, h = 50.0)) {
@@ -294,13 +294,16 @@ class GeneralTests {
         println(level.format())
     }
 
+    /**
+     * Manual inspection points:
+     * - Visually recognizable emojis should be drawn
+     * - There should not be any visual imperfections
+     */
     @Test
     fun `raster painting`() {
         val level = happyLevel {
             content {
                 val emoji = GeneralTests::class.java.getResourceAsStream("emoji.png")!!
-
-                preferences.colorCounts = 128
                 picture(emoji)
             }
         }
