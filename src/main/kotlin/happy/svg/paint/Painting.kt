@@ -8,7 +8,6 @@ import happy.svg.art
 import happy.svg.convert.HappyPreferences
 import happy.svg.isoscelesTriangle
 import happy.svg.possiblyInteractiveShape
-import happy.svg.transform
 import happy.svg.truncRingSector
 import path.utils.math.Transforms
 import path.utils.math.Transforms.AspectRatio
@@ -24,7 +23,6 @@ import java.io.Reader
 import java.net.URI
 import java.net.URLConnection
 import java.nio.file.Files
-import java.nio.file.spi.FileTypeDetector
 import java.util.*
 import javax.imageio.ImageIO
 import kotlin.math.PI
@@ -40,7 +38,14 @@ inline fun HappyPaint.fill(
         return doFill(path!!, color)
 
     doFill(prefs) { part, color ->
-        doFill(if (path != null) part and path else part, color)
+        val clipped = if (path != null) part and path else part
+        if (prefs.splitComplexShapes) {
+            clipped.splitToSubPaths().forEach {
+                doFill(it, color)
+            }
+        } else {
+            doFill(clipped, color)
+        }
     }
 }
 

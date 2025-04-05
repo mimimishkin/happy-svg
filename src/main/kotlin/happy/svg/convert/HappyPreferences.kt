@@ -24,6 +24,10 @@ data class HappyPreferences(
      */
     var mergePixels: Boolean,
     /**
+     * do split path with more than one `move to` commands to several paths (affects only gradient and raster painting)
+     */
+    var splitComplexShapes: Boolean,
+    /**
      * size to add to every gradient part to avoid spaces
      */
     var additionalGradientPartSize: Double,
@@ -47,6 +51,7 @@ data class HappyPreferences(
             colorCounts = 32,
             additionalPixelSize = 0.075,
             mergePixels = true,
+            splitComplexShapes = false,
             additionalGradientPartSize = 0.1,
             hints = RenderingHints(null),
             pixelSize = 2.0,
