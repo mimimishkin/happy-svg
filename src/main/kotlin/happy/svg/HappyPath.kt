@@ -8,8 +8,50 @@ import path.utils.paths.*
 import path.utils.paths.Command.*
 import kotlin.collections.plusAssign
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
-class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Format {
+class HappyPath(rawPath: Path, isAlreadyOptimized: Boolean = false) : HappyWheels.Format {
+    val path = if (isAlreadyOptimized) rawPath else rawPath.minify().validate().simplify()
+    val bounds = run {
+        var minX = Double.MAX_VALUE
+        var minY = Double.MAX_VALUE
+        var maxX = Double.MIN_VALUE
+        var maxY = Double.MIN_VALUE
+
+        for (command in path) {
+            when (command) {
+                is MoveTo -> {
+                    minX = min(minX, command.x)
+                    minY = min(minY, command.y)
+                    maxX = max(maxX, command.x)
+                    maxY = max(maxY, command.y)
+                }
+                is LineTo -> {
+                    minX = min(minX, command.x)
+                    minY = min(minY, command.y)
+                    maxX = max(maxX, command.x)
+                    maxY = max(maxY, command.y)
+                }
+                is QuadTo -> {
+                    minX = min(minX, command.x)
+                    minY = min(minY, command.y)
+                    maxX = max(maxX, command.x)
+                    maxY = max(maxY, command.y)
+                }
+                is CubicTo -> {
+                    minX = min(minX, command.x)
+                    minY = min(minY, command.y)
+                    maxX = max(maxX, command.x)
+                    maxY = max(maxY, command.y)
+                }
+                else -> continue
+            }
+        }
+
+        Bounds(minX, minY, maxX - minX, maxY - minY)
+    }
+
     companion object {
         private var currentId = 1
     }
@@ -69,7 +111,7 @@ class HappyPath(path: Path, val bounds: Bounds = path.bounds) : HappyWheels.Form
             path.scale(20 / bounds.area, anchor = bounds.center)
         }
 
-        for (command in validPath.minify().validate().simplify()) {
+        for (command in validPath) {
             when (command) {
                 is MoveTo -> {
                     if (firstMove == null) {

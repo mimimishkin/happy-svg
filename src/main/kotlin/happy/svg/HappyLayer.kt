@@ -343,14 +343,19 @@ internal class HappyLayerImpl(
         }
 
         if (ignoreLayer) {
-            val path = if (type == Polygon) {
+            var path = path?.minify()?.validate()?.simplify()
+            if (path != null && path.size <= 2) {
+                return
+            }
+
+            path = if (type == Polygon) {
                 val flatPath = requireNotNull(path) { "Path is null" }.toFlatPath(0.5)
                 if (flatPath.isClockwise) flatPath.reversePath() else flatPath
             } else {
                 path
             }
 
-            val happyPath = path?.let { HappyPath(it) }
+            val happyPath = path?.let { HappyPath(it, isAlreadyOptimized = true) }
             val area = requireNotNull(happyPath?.bounds ?: bounds) { "Bounds are null" }.area
             if (area < HappyWheels.minVisibleArea) {
                 return
