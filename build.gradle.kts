@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "io.github.mimimishkin"
-version = "1.0.0"
+version = "1.0.1"
 description = "Create Happy Wheels levels in Kotlin"
 
 java {
