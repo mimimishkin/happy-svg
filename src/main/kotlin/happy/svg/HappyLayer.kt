@@ -583,8 +583,6 @@ internal class HappyLayerImpl(
             preferences = preferences ?: this.preferences,
         )
 
-        // TODO: do not create new layer if it can be emulated with this (i.e., when clip == null)
-
         builder.block()
         group?.let { onGroup(it) }
     }
