@@ -6,6 +6,25 @@ import path.utils.math.distToSq
 import path.utils.math.orZero
 import path.utils.paths.*
 import path.utils.paths.Command.*
+import path.utils.paths.Command.ArcTo
+import path.utils.paths.Command.ArcToRelative
+import path.utils.paths.Command.Close
+import path.utils.paths.Command.CubicTo
+import path.utils.paths.Command.CubicToRelative
+import path.utils.paths.Command.HorizontalLineTo
+import path.utils.paths.Command.HorizontalLineToRelative
+import path.utils.paths.Command.LineTo
+import path.utils.paths.Command.LineToRelative
+import path.utils.paths.Command.MoveTo
+import path.utils.paths.Command.MoveToRelative
+import path.utils.paths.Command.QuadTo
+import path.utils.paths.Command.QuadToRelative
+import path.utils.paths.Command.SmoothCubicTo
+import path.utils.paths.Command.SmoothCubicToRelative
+import path.utils.paths.Command.SmoothQuadTo
+import path.utils.paths.Command.SmoothQuadToRelative
+import path.utils.paths.Command.VerticalLineTo
+import path.utils.paths.Command.VerticalLineToRelative
 import kotlin.collections.plusAssign
 import kotlin.math.abs
 import kotlin.math.max
@@ -20,33 +39,18 @@ class HappyPath(rawPath: Path, isAlreadyOptimized: Boolean = false) : HappyWheel
         var maxY = Double.MIN_VALUE
 
         for (command in path) {
-            when (command) {
-                is MoveTo -> {
-                    minX = min(minX, command.x)
-                    minY = min(minY, command.y)
-                    maxX = max(maxX, command.x)
-                    maxY = max(maxY, command.y)
-                }
-                is LineTo -> {
-                    minX = min(minX, command.x)
-                    minY = min(minY, command.y)
-                    maxX = max(maxX, command.x)
-                    maxY = max(maxY, command.y)
-                }
-                is QuadTo -> {
-                    minX = min(minX, command.x)
-                    minY = min(minY, command.y)
-                    maxX = max(maxX, command.x)
-                    maxY = max(maxY, command.y)
-                }
-                is CubicTo -> {
-                    minX = min(minX, command.x)
-                    minY = min(minY, command.y)
-                    maxX = max(maxX, command.x)
-                    maxY = max(maxY, command.y)
-                }
+            val (x, y) = when (command) {
+                is MoveTo -> command.p
+                is CubicTo -> command.p
+                is LineTo -> command.p
+                is QuadTo -> command.p
                 else -> continue
             }
+
+            minX = min(minX, x)
+            minY = min(minY, y)
+            maxX = max(maxX, x)
+            maxY = max(maxY, y)
         }
 
         Bounds(minX, minY, maxX - minX, maxY - minY)
