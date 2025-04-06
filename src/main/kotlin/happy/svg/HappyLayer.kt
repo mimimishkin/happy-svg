@@ -14,7 +14,7 @@ import java.awt.Color
 import kotlin.math.*
 
 @DslMarker
-annotation class HappyLayerDsl
+internal annotation class HappyLayerDsl
 
 @HappyLayerDsl
 interface HappyLayer {
@@ -335,7 +335,7 @@ internal class HappyLayerImpl(
         innerCutout: Float,
         ignoreLayer: Boolean,
     ) {
-        if (max(color.alpha, outline?.alpha ?: 0) < HappyWheels.minVisibleAlpha) {
+        if (max(color.alpha, outline?.alpha ?: 0) < HappyWheels.MIN_VISIBLE_ALPHA) {
             return
         }
         if (path != null && path.size <= 2) {
@@ -357,7 +357,7 @@ internal class HappyLayerImpl(
 
             val happyPath = path?.let { HappyPath(it, isAlreadyOptimized = true) }
             val area = requireNotNull(happyPath?.bounds ?: bounds) { "Bounds are null" }.area
-            if (area < HappyWheels.minVisibleArea) {
+            if (area < HappyWheels.MIN_VISIBLE_AREA) {
                 return
             }
 

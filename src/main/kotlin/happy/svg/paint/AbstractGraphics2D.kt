@@ -21,7 +21,7 @@ import java.awt.geom.AffineTransform.getRotateInstance as rotateTransform
 import java.awt.geom.AffineTransform.getScaleInstance as scaleTransform
 import java.awt.geom.AffineTransform.getShearInstance as shearTransform
 
-abstract class AbstractGraphics2D : Graphics2D() {
+internal abstract class AbstractGraphics2D : Graphics2D() {
     companion object {
         val defaultFont: Font = Font.decode(null)
     }

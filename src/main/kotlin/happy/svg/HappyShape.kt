@@ -60,8 +60,9 @@ data class HappyShape(
             param("p12", innerCutout)
     }
 
-    override val children: List<HappyWheels.Format>
-        get() = listOfNotNull(path)
+    override fun children(child: (HappyWheels.Format) -> Unit) {
+        path?.let(child)
+    }
 
     fun checkValid() {
         if (type == Polygon || type == Art) {

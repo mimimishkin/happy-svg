@@ -11,7 +11,7 @@ import java.awt.Color
 import java.awt.image.BufferedImage
 import kotlin.math.roundToInt
 
-object Pixelating {
+internal object Pixelating {
     inline fun doEveryPixel(
         img: BufferedImage,
         processPixel: (x: Int, y: Int, r: Int, g: Int, b: Int, a: Int) -> Unit
@@ -24,7 +24,7 @@ object Pixelating {
         for (y in 0 until img.height) {
             for (x in 0 until img.width) {
                 val offset = (x + y * img.width) * bands
-                if (!hasAlpha || pixels[offset + 3] > HappyWheels.minVisibleAlpha) {
+                if (!hasAlpha || pixels[offset + 3] > HappyWheels.MIN_VISIBLE_ALPHA) {
                     processPixel(x, y, pixels[offset], pixels[offset + 1], pixels[offset + 2], if (hasAlpha) pixels[offset + 3] else 255)
                 }
             }

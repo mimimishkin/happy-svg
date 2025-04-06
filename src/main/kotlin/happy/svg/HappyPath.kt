@@ -1,30 +1,15 @@
 package happy.svg
 
-import happy.svg.HappyWheels.scaled
+import happy.svg.HappyWheels.formatter
 import path.utils.math.Vec2
 import path.utils.math.distToSq
 import path.utils.math.orZero
 import path.utils.paths.*
-import path.utils.paths.Command.*
-import path.utils.paths.Command.ArcTo
-import path.utils.paths.Command.ArcToRelative
 import path.utils.paths.Command.Close
 import path.utils.paths.Command.CubicTo
-import path.utils.paths.Command.CubicToRelative
-import path.utils.paths.Command.HorizontalLineTo
-import path.utils.paths.Command.HorizontalLineToRelative
 import path.utils.paths.Command.LineTo
-import path.utils.paths.Command.LineToRelative
 import path.utils.paths.Command.MoveTo
-import path.utils.paths.Command.MoveToRelative
 import path.utils.paths.Command.QuadTo
-import path.utils.paths.Command.QuadToRelative
-import path.utils.paths.Command.SmoothCubicTo
-import path.utils.paths.Command.SmoothCubicToRelative
-import path.utils.paths.Command.SmoothQuadTo
-import path.utils.paths.Command.SmoothQuadToRelative
-import path.utils.paths.Command.VerticalLineTo
-import path.utils.paths.Command.VerticalLineToRelative
 import kotlin.collections.plusAssign
 import kotlin.math.abs
 import kotlin.math.max
@@ -69,12 +54,12 @@ class HappyPath(rawPath: Path, isAlreadyOptimized: Boolean = false) : HappyWheel
             val needAnchors = (leftAnchor == null || leftAnchor!! near point) && (rightAnchor == null || rightAnchor!! near point)
             return if (needAnchors) {
                 val (px, py) = point - bounds.center
-                "${px.scaled}_${py.scaled}"
+                formatter.format(px) + "_" + formatter.format(py)
             } else {
                 val (px, py) = point - bounds.center
                 val (a1x, a1y) = leftAnchor?.let { it - point }.orZero()
                 val (a2x, a2y) = rightAnchor?.let { it - point }.orZero()
-                "${px.scaled}_${py.scaled}_${a1x.scaled}_${a1y.scaled}_${a2x.scaled}_${a2y.scaled}"
+                listOf(px, py, a1x, a1y, a2x, a2y).joinToString("_") { formatter.format(it) }
             }
         }
     }

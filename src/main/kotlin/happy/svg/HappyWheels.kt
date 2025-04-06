@@ -9,17 +9,18 @@ import java.util.*
 object HappyWheels  {
     interface Format {
         val tag: String
-        val children: List<Format> get() = emptyList()
 
         fun params(param: (key: String, value: Any) -> Unit) {}
+
+        fun children(child: (child: Format) -> Unit) {}
 
         fun format(level: Int = 0, builder: StringBuilder) {
             fun Any.toParamString(): String = when (this) {
                 is String -> this
-                is Float -> scaled
-                is Double -> scaled
-                is Boolean -> symbol
-                is Color -> decimal.toString()
+                is Float -> formatter.format(this)
+                is Double -> formatter.format(this)
+                is Boolean -> if (this) "t" else "f"
+                is Color -> (red * 256 * 256 + green * 256 + blue).toString()
                 else -> toString()
             }
 
@@ -30,16 +31,15 @@ object HappyWheels  {
                 params { key, value ->
                     append(" $key=\"${value.toParamString()}\"")
                 }
-//                namedParams.asIterable().joinTo(this, separator = "") { (key, value) ->
-//                    " $key=\"${value.toParamString()}\""
-//                }
 
-                if (children.isNotEmpty()) {
-                    append(">\n")
-                    for (child in children) {
-                        child.format(level + 1, builder)
-                        append("\n")
-                    }
+                val i = length
+                children { child ->
+                    child.format(level + 1, builder)
+                    append("\n")
+                }
+
+                if (length > i) {
+                    insert(i, ">\n")
                     append(space)
                     append("</$tag>")
                 } else {
@@ -118,17 +118,11 @@ object HappyWheels  {
         Rectangle(0), Circle(1), Triangle(2), Polygon(3), Art(4)
     }
 
-    const val minVisibleAlpha = 2.55
+    const val MIN_VISIBLE_ALPHA = 2.55
 
-    const val minVisibleArea = 2.0
+    const val MIN_VISIBLE_AREA = 2.0
 
-    private val formatter = DecimalFormat("#.###", DecimalFormatSymbols(Locale.US))
-    val Float.scaled get() = formatter.format(this)!!
-    val Double.scaled get() = formatter.format(this)!!
+    internal val formatter = DecimalFormat("#.###", DecimalFormatSymbols(Locale.US))
 
-    val Boolean.symbol get() = if (this) "t" else "f"
-
-    val Color.decimal get() = red * 256 * 256 + green * 256 + blue
-
-    val levelBounds = Bounds(0.0, 0.0, 20000.0, 10000.0)
+    val LEVEL_BOUNDS = Bounds(0.0, 0.0, 20000.0, 10000.0)
 }

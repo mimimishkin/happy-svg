@@ -2,7 +2,6 @@ package happy.svg
 
 import happy.svg.HappyWheels.Background
 import happy.svg.HappyWheels.Character
-import happy.svg.HappyWheels.decimal
 import happy.svg.convert.HappyPreferences
 import path.utils.math.Vec2
 import java.awt.Color
@@ -32,7 +31,7 @@ data class HappyLevel(
             param("f", forceCharacter)
             param("h", hideVehicle)
             param("bg", backgroundType.number)
-            param("bgc", backgroundColor.decimal)
+            param("bgc", backgroundColor)
             param("e", e)
         }
     }
@@ -42,8 +41,9 @@ data class HappyLevel(
     ) : HappyWheels.Format, MutableList<HappyShape> by shapes {
         override val tag = "shapes"
 
-        override val children: List<HappyWheels.Format>
-            get() = shapes
+        override fun children(child: (HappyWheels.Format) -> Unit) {
+            shapes.forEach(child)
+        }
     }
 
     data class Groups(
@@ -51,18 +51,22 @@ data class HappyLevel(
     ) : HappyWheels.Format, MutableList<HappyGroup> by groups {
         override val tag = "groups"
 
-        override val children: List<HappyWheels.Format>
-            get() = groups
+        override fun children(child: (HappyWheels.Format) -> Unit) {
+            groups.forEach(child)
+        }
     }
 
     override val tag = "levelXML"
 
-    override val children: List<HappyWheels.Format>
-        get() = listOfNotNull(info, shapes.takeIf { it.isNotEmpty() }, groups.takeIf { it.isNotEmpty() })
+    override fun children(child: (HappyWheels.Format) -> Unit) {
+        child(info)
+        if (shapes.isNotEmpty()) child(shapes)
+        if (groups.isNotEmpty()) child(groups)
+    }
 }
 
 @DslMarker
-annotation class HappyLevelBuilderDsl
+internal annotation class HappyLevelBuilderDsl
 
 @HappyLevelBuilderDsl
 interface HappyLevelBuilder {

@@ -26,6 +26,7 @@ data class HappyGroup(
         param("fr", isFixedAngle)
     }
 
-    override val children: List<HappyWheels.Format>
-        get() = shapes
+    override fun children(child: (HappyWheels.Format) -> Unit) {
+        shapes.forEach(child)
+    }
 }

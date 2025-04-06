@@ -7,7 +7,7 @@ import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.roundToInt
 
-object Interpolation {
+internal object Interpolation {
     fun interpolateInPair(left: Color, right: Color, progress: Double): Color {
         val clip = { d: Double -> d.roundToInt().coerceIn(0..255) }
 
@@ -71,7 +71,7 @@ object Interpolation {
         processPart: (start: Double, end: Double, color: Color) -> Unit
     ) {
         doGradientFull(stops, size, prefs.minColorDifference, prefs.minGradientPartSize) { start, end, color ->
-            if (color.alpha > HappyWheels.minVisibleAlpha)
+            if (color.alpha > HappyWheels.MIN_VISIBLE_ALPHA)
                 processPart(start, end, color)
         }
     }

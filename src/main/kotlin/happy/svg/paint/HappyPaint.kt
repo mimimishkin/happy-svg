@@ -37,7 +37,7 @@ class HappyColor(
     val color: Color
 ) : HappyPaint {
     override fun doFill(prefs: HappyPreferences, doFill: (part: Path, color: Color) -> Unit) {
-        doFill(rect(HappyWheels.levelBounds), color)
+        doFill(rect(HappyWheels.LEVEL_BOUNDS), color)
     }
 }
 

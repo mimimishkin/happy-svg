@@ -1,7 +1,5 @@
 package happy.svg.paint
 
-import happy.svg.HappyLayer
-import path.utils.math.MatrixTransform
 import path.utils.math.Transforms
 import path.utils.paths.*
 import java.awt.Paint
