@@ -12,14 +12,13 @@ import java.awt.image.renderable.RenderableImage
 import java.text.AttributedCharacterIterator
 import java.util.*
 import javax.swing.ImageIcon
-import kotlin.collections.iterator
 import kotlin.math.abs
 import kotlin.math.min
 import java.awt.GraphicsEnvironment.getLocalGraphicsEnvironment as localGraphicsEnvironment
-import java.awt.geom.AffineTransform.getTranslateInstance as translateTransform
 import java.awt.geom.AffineTransform.getRotateInstance as rotateTransform
 import java.awt.geom.AffineTransform.getScaleInstance as scaleTransform
 import java.awt.geom.AffineTransform.getShearInstance as shearTransform
+import java.awt.geom.AffineTransform.getTranslateInstance as translateTransform
 
 internal abstract class AbstractGraphics2D : Graphics2D() {
     companion object {

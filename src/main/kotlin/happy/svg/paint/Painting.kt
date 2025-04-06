@@ -2,13 +2,9 @@ package happy.svg.paint
 
 import com.kitfox.svg.SVGDiagram
 import com.kitfox.svg.SVGUniverse
-import happy.svg.HappyLayer
+import happy.svg.*
 import happy.svg.HappyWheels.Collision
-import happy.svg.art
 import happy.svg.convert.HappyPreferences
-import happy.svg.isoscelesTriangle
-import happy.svg.possiblyInteractiveShape
-import happy.svg.truncRingSector
 import path.utils.math.Transforms
 import path.utils.math.Transforms.AspectRatio
 import path.utils.math.near

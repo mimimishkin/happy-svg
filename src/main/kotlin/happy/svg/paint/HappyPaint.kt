@@ -4,27 +4,18 @@ import happy.svg.HappyWheels
 import happy.svg.convert.HappyPreferences
 import happy.svg.convert.Interpolation
 import happy.svg.convert.Pixelating
-import path.utils.math.MatrixTransform
-import path.utils.math.Transforms
-import path.utils.math.Vec2
-import path.utils.math.lerp
-import path.utils.math.nearOrLess
+import path.utils.math.*
 import path.utils.paths.*
-import path.utils.paths.circle
-import path.utils.paths.rect
-import path.utils.paths.reversePath
-import path.utils.paths.transformWith
-import java.awt.Color
-import java.awt.LinearGradientPaint
+import java.awt.*
 import java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE
-import java.awt.Paint as AwtPaint
-import java.awt.RadialGradientPaint
-import java.awt.Rectangle
-import java.awt.TexturePaint
 import java.awt.geom.Rectangle2D
 import java.awt.image.BufferedImage
 import java.awt.image.ColorModel
-import kotlin.math.*
+import kotlin.math.atan2
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
+import java.awt.Paint as AwtPaint
 
 sealed interface HappyPaint {
     fun doFill(

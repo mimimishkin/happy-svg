@@ -2,11 +2,7 @@ package happy.svg.convert
 
 import happy.svg.HappyWheels
 import happy.svg.paint.hasAlpha
-import path.utils.paths.Bounds
-import path.utils.paths.Operand
-import path.utils.paths.Path
-import path.utils.paths.rect
-import path.utils.paths.toOperand
+import path.utils.paths.*
 import java.awt.Color
 import java.awt.image.BufferedImage
 import kotlin.math.roundToInt

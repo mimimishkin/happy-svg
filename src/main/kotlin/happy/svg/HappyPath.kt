@@ -5,12 +5,7 @@ import path.utils.math.Vec2
 import path.utils.math.distToSq
 import path.utils.math.orZero
 import path.utils.paths.*
-import path.utils.paths.Command.Close
-import path.utils.paths.Command.CubicTo
-import path.utils.paths.Command.LineTo
-import path.utils.paths.Command.MoveTo
-import path.utils.paths.Command.QuadTo
-import kotlin.collections.plusAssign
+import path.utils.paths.Command.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
