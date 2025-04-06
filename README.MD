@@ -12,7 +12,7 @@ Kotlin classes and DSL to create [Happy Wheels](https://totaljerkface.com/happy_
 Add this to your `build.gradle.kts`:
 
 ```kotlin
-implementation("io.github.mimimishkin:happy-svg:1.0.0")
+implementation("io.github.mimimishkin:happy-svg:1.0.1")
 
 // to work with svg paths, path transforms and clipping
 implementation("io.github.mimimishkin:path-utils:1.0.2")
