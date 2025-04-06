@@ -156,7 +156,6 @@ fun HappyTriangle(
     collision = collision
 )
 
-// TODO: 1. check for flat path and path direction
 fun HappyPolygon(
     path: HappyPath,
     color: Color,
